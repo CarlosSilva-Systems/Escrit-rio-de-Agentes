@@ -1,4 +1,6 @@
-import { writeFileAtomic } from '../../server/team/atomicWrite';
+import { mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { writeFileAtomic } from '../../server/home/fsAtomic';
 import { parseEscritorioText } from '../../server/team/validate';
 import { renderDiagnostic } from './check';
 import type { CliIo } from './check';
@@ -26,7 +28,10 @@ export interface InitDeps extends CliIo {
 
 export const defaultInitDeps = (io: CliIo): InitDeps => ({
   ...io,
-  writeText: (path, data) => writeFileAtomic(path, data),
+  writeText: async (path, data) => {
+    await mkdir(dirname(path), { recursive: true });
+    await writeFileAtomic(path, data);
+  },
   now: () => new Date(),
 });
 

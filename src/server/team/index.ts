@@ -1,4 +1,3 @@
-export * from './atomicWrite';
 export * from './consistency';
 export * from './diagnostics';
 export * from './diff';

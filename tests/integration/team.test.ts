@@ -3,12 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { runTeamCli } from '../../src/cli/team';
-import {
-  createFsTeamWatcher,
-  readTextOrNull,
-  TeamRegistry,
-  writeFileAtomic,
-} from '../../src/server/team';
+import { writeFileAtomic } from '../../src/server/home/fsAtomic';
+import { createFsTeamWatcher, readTextOrNull, TeamRegistry } from '../../src/server/team';
 import type { TeamChange } from '../../src/server/team';
 
 const fixtures = join(import.meta.dirname, '..', 'fixtures');

@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { open, readFile, rename, rm } from 'node:fs/promises';
+import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
 const RETRYABLE = new Set(['EPERM', 'EBUSY', 'EACCES']);
@@ -44,6 +44,7 @@ export async function writeFileAtomic(
 ): Promise<void> {
   const temp = join(dirname(file), `.${basename(file)}.${randomBytes(6).toString('hex')}.tmp`);
   try {
+    await mkdir(dirname(file), { recursive: true });
     const handle = await open(temp, 'w', options.mode ?? 0o600);
     try {
       await handle.writeFile(data);
