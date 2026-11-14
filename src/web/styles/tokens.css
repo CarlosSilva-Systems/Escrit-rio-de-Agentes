@@ -1,0 +1,197 @@
+/* Copied from docs/design/tokens.css (Bianca, v1, 2026-11-12). Keep in sync: the docs file is the source of truth. */
+/* Escritório da Equipe — design tokens (v1, 2026-11-12, Bianca)
+ * Fonte da verdade dos valores: GUIA-VISUAL.md. Contrastes WCAG calculados lá.
+ * Uso: importar uma vez na raiz; componentes só consomem var(--...).
+ */
+/* Fonts (SIL OFL 1.1), served locally from /assets/fonts (copied by vite.config.ts); no CDN. */
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('/assets/fonts/PixelifySans-Variable.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('/assets/fonts/Silkscreen-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('/assets/fonts/Silkscreen-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---------- HUD (tema escuro quente) ---------- */
+  --bg-900: #1f1a17; /* fundo da página/HUD base */
+  --bg-800: #2a2320; /* painéis, gavetas, barra superior */
+  --bg-700: #3a312c; /* cartões, campos, itens elevados */
+  --bg-track: #120f0d; /* trilho de barras, sombras duras */
+  --border-soft: #5a4a40; /* separadores decorativos (sem função de informação) */
+  --border-strong: #94806e; /* contorno de controles (>= 3:1 em bg-900/800/700) */
+
+  --text-1: #f6ebdd; /* texto principal */
+  --text-2: #d4c3b0; /* texto secundário */
+  --text-3: #b5a18c; /* texto terciário (min 4.5:1 em bg-700) */
+  --text-disabled: #8a7766; /* desabilitado (isento de contraste; 3.6:1 em bg-800) */
+  --ink: #1f1a17; /* texto sobre fundos claros/coloridos */
+
+  --teal-300: #5fc9b8; /* verde-água: ação primária, links, foco secundário */
+  --terra-300: #e8896a; /* terracota: destaque, avisos suaves */
+  --focus: #ffd84d; /* anel de foco (12.5:1 em bg-900) */
+
+  /* ---------- Estado / medidor ---------- */
+  --meter-green: #5fcb6e; /* 0–60 % */
+  --meter-yellow: #f2c94c; /* >60–85 % */
+  --meter-red: #f2685a; /* >85 % (preenchimento) */
+  --danger-text: #f77b6b; /* texto vermelho (4.8:1 em bg-700) */
+
+  /* ---------- Departamentos ----------
+   * --dept-X-light : texto/ícone/crachá no HUD escuro (crachá usa --ink como texto)
+   * --dept-X-base  : tapete, placa de porta, arte do mapa
+   * --dept-X-on    : cor do texto sobre --dept-X-base
+   */
+  --dept-diretoria-light: #edbe45;
+  --dept-diretoria-base: #c9962a;
+  --dept-diretoria-on: #1f1a17;
+  --dept-planejamento-light: #bca3ee;
+  --dept-planejamento-base: #9a7dd6;
+  --dept-planejamento-on: #1f1a17;
+  --dept-engenharia-light: #78b0f5;
+  --dept-engenharia-base: #5b94e0;
+  --dept-engenharia-on: #1f1a17;
+  --dept-qualidade-light: #6fcf7c;
+  --dept-qualidade-base: #3e9b55;
+  --dept-qualidade-on: #1f1a17;
+  --dept-entrega-light: #f59f45;
+  --dept-entrega-base: #e0792b;
+  --dept-entrega-on: #1f1a17;
+  --dept-biblioteca-light: #e58aa5;
+  --dept-biblioteca-base: #8e2f4b;
+  --dept-biblioteca-on: #f6ebdd;
+
+  /* ---------- Arte do mapa (referência; a arte final vive nos sprites) ---------- */
+  --art-floor-honey: #d9a566;
+  --art-floor-honey-dark: #c98f52;
+  --art-floor-honey-light: #e8bb80;
+  --art-wall-cream: #f3e6cc;
+  --art-wall-cream-shade: #e2d0ae;
+  --art-wall-trim: #b98c5a;
+  --art-teal: #4fb3a5;
+  --art-teal-deep: #2e7f76;
+  --art-terracotta: #c8643f;
+  --art-terracotta-light: #e08a5f;
+  --art-leaf: #4e9a4f;
+  --art-leaf-deep: #2f6b3a;
+  --art-outline: #3b2a20;
+  --art-soc-floor: #26323f;
+  --art-soc-screen: #4fe38b;
+  --art-soc-blue: #4a7bd0;
+
+  /* ---------- Ciclo dia/noite (sobreposição sobre o mapa; nunca sobre o HUD) ---------- */
+  --tint-dawn: rgba(255, 181, 138, 0.18); /* 05:30–07:59 */
+  --tint-day: rgba(255, 255, 255, 0); /* 08:00–16:59 */
+  --tint-dusk: rgba(255, 138, 91, 0.22); /* 17:00–18:59 */
+  --tint-night: rgba(30, 42, 94, 0.42); /* 19:00–05:29 */
+  --sky-dawn: #ffd8b0;
+  --sky-day: #bfe3f5;
+  --sky-dusk: #ffa36b;
+  --sky-night: #1b2748;
+  --lamp-glow: rgba(255, 217, 160, 0.55);
+
+  /* ---------- Espaçamento (múltiplos de 4 px) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---------- Raios (estilo pixel: quinas retas ou chanfro de 4 px) ---------- */
+  --radius-0: 0;
+  --radius-1: 4px;
+  --radius-2: 8px;
+
+  /* ---------- Sombras pixel (duras, sem blur) ---------- */
+  --shadow-1: 0 2px 0 0 var(--bg-track);
+  --shadow-2: 0 4px 0 0 var(--bg-track);
+  --shadow-3: 0 4px 0 0 var(--bg-track), 0 8px 0 0 rgba(18, 15, 13, 0.5);
+  --outline-1: 0 0 0 2px var(--border-strong);
+  --focus-ring:
+    0 0 0 2px var(--bg-900), 0 0 0 4px var(--focus); /* duplo: funciona sobre qualquer fundo */
+
+  /* ---------- Z-index ---------- */
+  --z-map: 0;
+  --z-map-overlay: 10; /* balões, ícones de status, tooltip do NPC */
+  --z-minimap: 20;
+  --z-bottom-panel: 30;
+  --z-drawer: 40;
+  --z-topbar: 50;
+  --z-popover: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+
+  /* ---------- Tipografia ---------- */
+  --font-ui: 'Pixelify Sans', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --font-sign: 'Silkscreen', 'Pixelify Sans', ui-monospace, monospace;
+  --font-mono: 'Cascadia Mono', Consolas, 'Courier New', monospace; /* terminal e código */
+  --fs-sm: 14px;
+  --lh-sm: 20px; /* mínimo absoluto para texto de interface */
+  --fs-md: 16px;
+  --lh-md: 24px; /* corpo padrão */
+  --fs-lg: 20px;
+  --lh-lg: 28px;
+  --fs-xl: 24px;
+  --lh-xl: 32px;
+  --fs-2xl: 32px;
+  --lh-2xl: 40px;
+  --fs-sign-sm: 16px; /* Silkscreen: só múltiplos de 8 px */
+  --fs-sign-md: 24px;
+  --fs-sign-lg: 32px;
+
+  /* ---------- Movimento ---------- */
+  --dur-fast: 120ms;
+  --dur-base: 160ms;
+  --dur-slow: 240ms;
+  --ease-pixel: steps(4, end);
+}
+
+/* Redução de movimento: remove deslizes, piscadas e máquina de escrever. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --ease-pixel: linear;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Pixel art nítida (sem desfoque) */
+.pixelated,
+canvas.office {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Foco visível padrão */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
