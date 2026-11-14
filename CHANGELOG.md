@@ -32,7 +32,15 @@ office on `127.0.0.1`, with the team roster, live NPC states, activity, and diag
 - `escritorio` command for the server lifecycle (`start`, `open`, `stop`, `status`,
   `token:rotate`) and settings commands with diff, apply, and revert.
 - Quality gates: `credits:check`, `qa:contrast`, and `perf:fase1`, plus Playwright and integration
-  suites for the phase 1 acceptance criteria.
+  suites for the phase 1 acceptance criteria. `npm run check` runs 474 unit and 205 integration
+  tests.
+- Sign-out button in the top bar, with confirmation; signing out ends the server session and shows
+  the access screen without reloading.
+- `GET /api/config` and `PATCH /api/config`: the browser reads and saves its closed list of
+  settings (language and the other public options), persisted atomically.
+- Project favicon (pixel-art window over a desk), credited as project art.
+- Architecture decision records ADR-0001 to ADR-0008 accepted, with ADR-0002 accepted with a
+  recorded CPU deviation and ADR-0003 still proposed.
 
 ### Changed
 

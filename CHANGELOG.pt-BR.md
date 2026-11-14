@@ -35,7 +35,16 @@ atividade e os diagnósticos.
 - Comando `escritorio` para o ciclo de vida do servidor (`start`, `open`, `stop`, `status`,
   `token:rotate`) e comandos de configurações com diff, aplicação e reversão.
 - Portões de qualidade: `credits:check`, `qa:contrast` e `perf:fase1`, além de suítes Playwright e
-  de integração para os critérios de aceite da fase 1.
+  de integração para os critérios de aceite da fase 1. `npm run check` roda 474 testes unitários e
+  205 de integração.
+- Botão de sair na barra superior, com confirmação; sair encerra a sessão no servidor e mostra a
+  tela de acesso sem recarregar a página.
+- `GET /api/config` e `PATCH /api/config`: o navegador lê e salva a sua lista fechada de
+  configurações (idioma e as demais opções públicas), gravadas de forma atômica.
+- Favicon próprio do projeto (uma janela em pixel art sobre uma mesa), creditado como arte do
+  projeto.
+- Registros de decisão de arquitetura ADR-0001 a ADR-0008 aceitos, com a ADR-0002 aceita com um
+  desvio de CPU registrado e a ADR-0003 ainda proposta.
 
 ### Alterado
 
