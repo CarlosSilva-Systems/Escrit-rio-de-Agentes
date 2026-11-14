@@ -1,0 +1,8 @@
+{
+  "agentType": "dev-web",
+  "isBuiltIn": false,
+  "description": "CANARY-DESCRIPTION",
+  "toolUseId": "toolu_syn1",
+  "spawnDepth": 1,
+  "finished": true
+}

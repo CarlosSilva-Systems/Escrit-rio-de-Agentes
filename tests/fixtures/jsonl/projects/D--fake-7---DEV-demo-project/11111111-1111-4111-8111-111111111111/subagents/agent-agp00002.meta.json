@@ -1,0 +1,7 @@
+{
+  "agentType": "general-purpose",
+  "isBuiltIn": true,
+  "description": "CANARY-DESCRIPTION",
+  "toolUseId": "toolu_syn2",
+  "spawnDepth": 1
+}
