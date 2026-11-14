@@ -1,0 +1,59 @@
+{
+  "name": "escritorio-equipe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local pixel-art web office for the Claude Code agent team: live NPCs, chat with the Director, approvals, kanban and usage meter.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build && node scripts/build-server.mjs",
+    "start": "node dist/server/index.js",
+    "open": "node dist/cli.js open",
+    "lint": "eslint . && prettier --check .",
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.web.json --noEmit && tsc -p tsconfig.e2e.json --noEmit",
+    "format": "prettier --write .",
+    "test:unit": "vitest run src",
+    "test:int": "vitest run tests/integration --passWithNoTests",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run typecheck && npm run test:unit && npm run test:int",
+    "schemas:gen": "tsx scripts/gen-schemas.mjs",
+    "settings:diff": "node dist/cli.js settings:diff",
+    "team:check": "node dist/cli.js team:check",
+    "team:init": "node dist/cli.js team:init",
+    "settings:apply": "node dist/cli.js settings:apply",
+    "settings:revert": "node dist/cli.js settings:revert",
+    "hooks:sync": "node dist/cli.js hooks:sync",
+    "verify:baseline": "node scripts/verify-baseline.mjs"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.5",
+    "@fastify/rate-limit": "11.2.2",
+    "@fastify/static": "10.1.10",
+    "@fastify/websocket": "11.3.7",
+    "fastify": "5.12.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}
