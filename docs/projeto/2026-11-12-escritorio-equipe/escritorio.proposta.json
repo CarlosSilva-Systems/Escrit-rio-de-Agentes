@@ -1,0 +1,574 @@
+{
+  "schema": "escritorio/v1",
+  "updatedAt": "2026-11-12T23:00:00.000Z",
+  "studio": {
+    "name": "Estúdio do Carlos",
+    "nameIsProvisional": true
+  },
+  "departments": [
+    {
+      "id": "diretoria",
+      "name": "Diretoria",
+      "colorToken": "dept-diretoria",
+      "rooms": [
+        "DIR"
+      ]
+    },
+    {
+      "id": "planejamento",
+      "name": "Planejamento",
+      "colorToken": "dept-planejamento",
+      "rooms": [
+        "PLN"
+      ]
+    },
+    {
+      "id": "engenharia",
+      "name": "Engenharia",
+      "colorToken": "dept-engenharia",
+      "rooms": [
+        "ENG"
+      ]
+    },
+    {
+      "id": "qualidade",
+      "name": "Qualidade e Segurança",
+      "colorToken": "dept-qualidade",
+      "rooms": [
+        "QUA",
+        "SOC"
+      ]
+    },
+    {
+      "id": "entrega",
+      "name": "Entrega",
+      "colorToken": "dept-entrega",
+      "rooms": [
+        "ENT"
+      ]
+    },
+    {
+      "id": "biblioteca",
+      "name": "Biblioteca",
+      "colorToken": "dept-biblioteca",
+      "rooms": [
+        "BIB"
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "agentType": "chefe",
+      "nickname": "Henrique",
+      "fullName": "Henrique Bastos Albuquerque",
+      "title": "Diretor de Projetos",
+      "department": "diretoria",
+      "desk": "DIR-00",
+      "sprite": "npc-chefe",
+      "badge": "diretoria",
+      "isLead": true,
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "calmo",
+          "organizado",
+          "decidido",
+          "cobra o DoD"
+        ],
+        "tone": "Fala pouco e direto, sempre com o próximo passo; elogia em público e cobra em particular.",
+        "routineWeights": {
+          "coffee": 2,
+          "window": 2,
+          "copa-chat": 1,
+          "arcade": 0.5
+        }
+      },
+      "phrases": [
+        "Qual é o critério de aceite disso?",
+        "Sem teste passando não é \"pronto\", é \"quase\".",
+        "Carlos aprovou, pessoal. Mãos à obra!",
+        "Prazo bom é prazo combinado.",
+        "Alguém viu a Gabriela? Preciso desse PR hoje."
+      ]
+    },
+    {
+      "agentType": "analista",
+      "nickname": "Alice",
+      "fullName": "Alice Monteiro Ramos",
+      "title": "Analista de Requisitos Sênior",
+      "department": "planejamento",
+      "desk": "PLN-01",
+      "sprite": "npc-alice",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "curiosa",
+          "detalhista",
+          "faz muitas perguntas"
+        ],
+        "tone": "Pergunta \"e se…?\" o tempo todo e anota tudo num post-it.",
+        "routineWeights": {
+          "coffee": 2,
+          "copa-chat": 2,
+          "window": 1
+        }
+      },
+      "phrases": [
+        "Dado, quando, então. Sempre.",
+        "Isso está dentro ou fora do escopo?",
+        "Mais um post-it e o quadro desaba.",
+        "Anotei três perguntas para o Carlos.",
+        "Requisito sem critério de aceite é desejo."
+      ]
+    },
+    {
+      "agentType": "arquiteto",
+      "nickname": "Artur",
+      "fullName": "Artur Vasconcelos Prado",
+      "title": "Arquiteto de Software",
+      "department": "planejamento",
+      "desk": "PLN-02",
+      "sprite": "npc-artur",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "ponderado",
+          "pragmático",
+          "fã de diagramas"
+        ],
+        "tone": "Pensa em voz alta, compara alternativas e sempre pergunta \"qual é o mais simples que atende?\".",
+        "routineWeights": {
+          "coffee": 3,
+          "window": 2,
+          "library": 1
+        }
+      },
+      "phrases": [
+        "Isso merece um ADR.",
+        "O mais simples que atende, por favor.",
+        "Desenhei de novo. Agora cabe numa folha.",
+        "Antes de escolher, vamos medir.",
+        "Quem mexer nesse contrato me avisa, combinado?"
+      ]
+    },
+    {
+      "agentType": "designer-ux",
+      "nickname": "Bianca",
+      "fullName": "Bianca Toledo Nakamura",
+      "title": "Designer de UX/UI",
+      "department": "planejamento",
+      "desk": "PLN-03",
+      "sprite": "npc-bianca",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "criativa",
+          "atenta à acessibilidade",
+          "ama paletas"
+        ],
+        "tone": "Animada, fala de cores e de pessoas; defende o contraste como se fosse lei.",
+        "routineWeights": {
+          "window": 3,
+          "terrace": 2,
+          "coffee": 1
+        }
+      },
+      "phrases": [
+        "Contraste 4,5 para 1, nem um pixel a menos.",
+        "Esse verde-água ficou lindo com a terracota.",
+        "Cadê minha caneta? Ah, tá no cabelo.",
+        "O usuário não lê, ele escaneia.",
+        "Testei com movimento reduzido. Passou!"
+      ]
+    },
+    {
+      "agentType": "dev-web",
+      "nickname": "Lívia",
+      "fullName": "Lívia Carvalho Mendes",
+      "title": "Desenvolvedora Front-end",
+      "department": "engenharia",
+      "desk": "ENG-01",
+      "sprite": "npc-livia",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "rápida",
+          "caprichosa com detalhes",
+          "bem-humorada"
+        ],
+        "tone": "Animada e prática; comemora cada build verde.",
+        "routineWeights": {
+          "coffee": 2,
+          "copa-chat": 2,
+          "pingpong": 2
+        }
+      },
+      "phrases": [
+        "Funciona no Edge, no Chrome e no meu coração.",
+        "Build verde! Alguém quer café?",
+        "Quem colocou texto fixo sem i18n?",
+        "Responsivo até no celular, pode testar.",
+        "Mais um componente reaproveitado, que alegria."
+      ]
+    },
+    {
+      "agentType": "dev-backend",
+      "nickname": "Bruno",
+      "fullName": "Bruno Siqueira Fontes",
+      "title": "Desenvolvedor Back-end",
+      "department": "engenharia",
+      "desk": "ENG-02",
+      "sprite": "npc-bruno",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "metódico",
+          "tranquilo",
+          "obcecado por logs"
+        ],
+        "tone": "Fala baixo, explica com calma e sempre pergunta \"e se a requisição falhar?\".",
+        "routineWeights": {
+          "coffee": 3,
+          "arcade": 1,
+          "water": 1
+        }
+      },
+      "phrases": [
+        "Timeout configurado. Ninguém fica pendurado.",
+        "Validei a entrada. Sempre valide a entrada.",
+        "Os logs não mentem.",
+        "API nova no ar, só que em 127.0.0.1.",
+        "Mais um café e eu refatoro esse serviço."
+      ]
+    },
+    {
+      "agentType": "dev-odoo",
+      "nickname": "Otávio",
+      "fullName": "Otávio Brandão Leite",
+      "title": "Desenvolvedor Odoo (padrão OCA)",
+      "department": "engenharia",
+      "desk": "ENG-03",
+      "sprite": "npc-otavio",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "paciente",
+          "conhece cada módulo",
+          "fiel à OCA"
+        ],
+        "tone": "Calmo e didático; sempre com a caneca roxa na mão.",
+        "routineWeights": {
+          "coffee": 3,
+          "copa-chat": 1,
+          "window": 1
+        }
+      },
+      "phrases": [
+        "Herança, não cópia. Sempre herança.",
+        "Migrando módulo de novo... faz parte.",
+        "O pre-commit da OCA reclamou, mas eu arrumo.",
+        "Quem pegou minha caneca roxa?",
+        "Manifest atualizado, versão certinha."
+      ]
+    },
+    {
+      "agentType": "dev-embarcados",
+      "nickname": "Eduardo",
+      "fullName": "Eduardo Pacheco Nunes",
+      "title": "Engenheiro de Sistemas Embarcados",
+      "department": "engenharia",
+      "desk": "ENG-04",
+      "sprite": "npc-eduardo",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "engenhoso",
+          "cuidadoso",
+          "fala em bytes"
+        ],
+        "tone": "Entusiasmado com hardware, mede tudo antes de soldar.",
+        "routineWeights": {
+          "coffee": 2,
+          "terrace": 1,
+          "arcade": 2
+        }
+      },
+      "phrases": [
+        "Esse ESP32 tem mais memória do que parece.",
+        "Óculos de proteção primeiro, ferro de solda depois.",
+        "O osciloscópio não mente.",
+        "Nada de gravar em hardware real sem OK.",
+        "Interrupção curta, sempre."
+      ]
+    },
+    {
+      "agentType": "dev-automacao",
+      "nickname": "Rafael",
+      "fullName": "Rafael Moura Teixeira",
+      "title": "Engenheiro de Automação Industrial",
+      "department": "engenharia",
+      "desk": "ENG-05",
+      "sprite": "npc-rafael",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "prudente",
+          "prático",
+          "segurança em primeiro lugar"
+        ],
+        "tone": "Fala como quem está no chão de fábrica; pensa sempre no estado seguro.",
+        "routineWeights": {
+          "coffee": 2,
+          "terrace": 2,
+          "pingpong": 1
+        }
+      },
+      "phrases": [
+        "Primeiro o estado seguro, depois o resto.",
+        "Ladder bonito é ladder comentado.",
+        "No CLP real, só com autorização.",
+        "Colete e capacete pendurados, prontos.",
+        "Modbus de novo? Bora mapear os registradores."
+      ]
+    },
+    {
+      "agentType": "testador-qa",
+      "nickname": "Teresa",
+      "fullName": "Teresa Almeida Couto",
+      "title": "Analista de Qualidade (QA)",
+      "department": "qualidade",
+      "desk": "QUA-01",
+      "sprite": "npc-teresa",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "persistente",
+          "desconfiada (no bom sentido)",
+          "adora encontrar bugs"
+        ],
+        "tone": "Simpática, mas sempre com a lupa na mão; transforma bug em teste.",
+        "routineWeights": {
+          "coffee": 2,
+          "copa-chat": 2,
+          "window": 1
+        }
+      },
+      "phrases": [
+        "Achei um bug. Digo, uma oportunidade.",
+        "Qual CA esse teste cobre?",
+        "Funciona na sua máquina? Que bom, na minha não.",
+        "Matriz atualizada: nenhum Must descoberto.",
+        "Reproduzi! Agora vira teste automatizado."
+      ]
+    },
+    {
+      "agentType": "revisor-codigo",
+      "nickname": "Rita",
+      "fullName": "Rita Figueiredo Sales",
+      "title": "Revisora de Código",
+      "department": "qualidade",
+      "desk": "QUA-02",
+      "sprite": "npc-rita",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "criteriosa",
+          "justa",
+          "elegante na crítica"
+        ],
+        "tone": "Educada e precisa; aponta o problema e sugere a solução.",
+        "routineWeights": {
+          "coffee": 2,
+          "library": 2,
+          "window": 1
+        }
+      },
+      "phrases": [
+        "Esse nome de função conta uma história diferente.",
+        "Sugestão, não bloqueante. Mas pense nela.",
+        "Código morto no diff? Pode tirar.",
+        "Aprovado. Bonito de ler.",
+        "Mais um PR impresso pra pilha."
+      ]
+    },
+    {
+      "agentType": "revisor-seguranca",
+      "nickname": "Sérgio",
+      "fullName": "Sérgio Rezende Matos",
+      "title": "Especialista em Segurança de Aplicações",
+      "department": "qualidade",
+      "desk": "SOC-01",
+      "sprite": "npc-sergio",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "sério",
+          "discreto",
+          "irônico de leve"
+        ],
+        "tone": "Fala pouco, de óculos escuros mesmo dentro do SOC; toda conversa vira modelo de ameaças.",
+        "routineWeights": {
+          "coffee": 2,
+          "window": 1,
+          "terrace": 1
+        }
+      },
+      "phrases": [
+        "Segredo no código? Nem pensar.",
+        "Bind em 0.0.0.0? Só por cima do meu cadeado.",
+        "Rodei o SCA. Duas dependências pra atualizar.",
+        "Confia, mas valida o Origin.",
+        "Nada de token na URL."
+      ]
+    },
+    {
+      "agentType": "pentester",
+      "nickname": "Pedro",
+      "fullName": "Pedro Galvão Rocha",
+      "title": "Analista de Testes de Intrusão (Pentester)",
+      "department": "qualidade",
+      "desk": "SOC-02",
+      "sprite": "npc-pedro",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "brincalhão",
+          "curioso",
+          "pensa como atacante"
+        ],
+        "tone": "De capuz, fala rápido e se diverte quebrando coisas (com autorização).",
+        "routineWeights": {
+          "arcade": 4,
+          "coffee": 1,
+          "copa-chat": 1
+        }
+      },
+      "phrases": [
+        "E se eu mandar um ../../ aqui?",
+        "Teste autorizado, ambiente local. Bora!",
+        "Tentei DNS rebinding. Bloqueado, parabéns.",
+        "Recorde novo no fliperama.",
+        "Relatório pronto: zero crítico."
+      ]
+    },
+    {
+      "agentType": "git-github",
+      "nickname": "Gabriela",
+      "fullName": "Gabriela Freitas Andrade",
+      "title": "Engenheira de Versionamento e Releases",
+      "department": "entrega",
+      "desk": "ENT-01",
+      "sprite": "npc-gabriela",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "organizada",
+          "firme",
+          "ama histórico limpo"
+        ],
+        "tone": "Gentil mas inflexível com o padrão de commit; desenha branches no quadro.",
+        "routineWeights": {
+          "coffee": 2,
+          "copa-chat": 2,
+          "pingpong": 1
+        }
+      },
+      "phrases": [
+        "Commit atômico ou nada.",
+        "Devolvi seu commit: faltou o escopo.",
+        "CHANGELOG atualizado nas duas línguas.",
+        "Push só com OK do Carlos.",
+        "Olha que árvore de branches bonita."
+      ]
+    },
+    {
+      "agentType": "documentador",
+      "nickname": "Davi",
+      "fullName": "Davi Coutinho Barros",
+      "title": "Redator Técnico",
+      "department": "entrega",
+      "desk": "ENT-02",
+      "sprite": "npc-davi",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "calmo",
+          "claro",
+          "bilíngue"
+        ],
+        "tone": "Escreve devagar e bem; adora a máquina de escrever e odeia link quebrado.",
+        "routineWeights": {
+          "library": 3,
+          "coffee": 2,
+          "window": 1
+        }
+      },
+      "phrases": [
+        "Testei o comando antes de documentar.",
+        "Tutorial, how-to, referência ou explicação?",
+        "Versão em inglês pronta, sem tradução literal.",
+        "Link quebrado? Não no meu turno.",
+        "Escrevi o manual para quem nunca viu o projeto."
+      ]
+    },
+    {
+      "agentType": "pesquisador",
+      "nickname": "Paula",
+      "fullName": "Paula Rios Medeiros",
+      "title": "Pesquisadora Técnica",
+      "department": "biblioteca",
+      "desk": "BIB-01",
+      "sprite": "npc-paula",
+      "since": "2026-11-12",
+      "personality": {
+        "traits": [
+          "curiosa",
+          "rigorosa com fontes",
+          "tranquila"
+        ],
+        "tone": "Fala citando a fonte e a data; diferencia fato de suposição.",
+        "routineWeights": {
+          "library": 4,
+          "window": 2,
+          "coffee": 1
+        }
+      },
+      "phrases": [
+        "Fonte e data, por favor.",
+        "Isso é fato ou inferência?",
+        "Achei na documentação de ontem.",
+        "Versão nova saiu semana passada.",
+        "Deixei marcado como não confirmado."
+      ]
+    }
+  ],
+  "freelancer": {
+    "nickname": "Freelancer",
+    "title": "Colaborador visitante",
+    "homeRoom": "REC",
+    "sprite": "npc-freelancer",
+    "badge": "visitante",
+    "showAgentTypeAsLabel": true,
+    "phrases": [
+      "Oi! Vim só para essa tarefa.",
+      "Onde fica o café por aqui?",
+      "Crachá de visitante, mas trabalho de profissional."
+    ]
+  },
+  "mascots": [
+    {
+      "id": "pacoca",
+      "name": "Paçoca",
+      "species": "pomeranian",
+      "description": "Lulu da Pomerânia laranja, segue quem está de pé.",
+      "sprite": "pet-lulu"
+    },
+    {
+      "id": "biscoito",
+      "name": "Biscoito",
+      "species": "golden-retriever",
+      "description": "Filhote de golden, dorme perto de quem está parado.",
+      "sprite": "pet-golden"
+    }
+  ]
+}

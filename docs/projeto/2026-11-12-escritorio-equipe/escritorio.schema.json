@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://escritorio-equipe.local/schemas/escritorio.v1.schema.json",
+  "title": "escritorio.json (escritorio/v1)",
+  "description": "Team configuration of the office. Lives at ~/.claude/equipe/escritorio.json. Maintained by the rh-equipe skill. Desks are symbolic ids resolved against assets/map/mapa.json (mapa/v1).",
+  "type": "object",
+  "required": [
+    "schema",
+    "studio",
+    "departments",
+    "agents",
+    "freelancer"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "escritorio/v1"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "studio": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "nameIsProvisional": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "departments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "colorToken",
+          "rooms"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/slug"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "colorToken": {
+            "type": "string",
+            "pattern": "^dept-[a-z0-9-]+$",
+            "description": "Design token defined in docs/design/GUIA-VISUAL.md"
+          },
+          "rooms": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/mapId"
+            },
+            "description": "Room ids from mapa.json (e.g. QUA, SOC)"
+          }
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/agent"
+      }
+    },
+    "freelancer": {
+      "type": "object",
+      "required": [
+        "nickname",
+        "title",
+        "homeRoom",
+        "sprite",
+        "badge",
+        "phrases"
+      ],
+      "additionalProperties": false,
+      "description": "Template for any agent_type not listed in agents[] (e.g. general-purpose).",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "sprite": {
+          "$ref": "#/$defs/slug"
+        },
+        "badge": {
+          "const": "visitante"
+        },
+        "showAgentTypeAsLabel": {
+          "type": "boolean",
+          "default": true
+        },
+        "phrases": {
+          "$ref": "#/$defs/phrases"
+        },
+        "homeRoom": {
+          "$ref": "#/$defs/mapId",
+          "description": "Room where freelancers arrive and wait (REC)."
+        }
+      }
+    },
+    "mascots": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "species",
+          "sprite"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/slug"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24
+          },
+          "species": {
+            "enum": [
+              "pomeranian",
+              "golden-retriever"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "sprite": {
+            "$ref": "#/$defs/slug"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 48
+    },
+    "phrases": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": [
+        "agentType",
+        "nickname",
+        "fullName",
+        "title",
+        "department",
+        "desk",
+        "sprite",
+        "personality",
+        "phrases"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agentType": {
+          "$ref": "#/$defs/slug",
+          "description": "= frontmatter name of ~/.claude/agents/<name>.md = hook agent_type. Unique."
+        },
+        "nickname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "fullName": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 60
+        },
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "department": {
+          "$ref": "#/$defs/slug"
+        },
+        "desk": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/mapId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Desk/seat id from mapa.json (e.g. PLN-02). null = provisional desk at reception (FL-D1/FL-D2)."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false
+        },
+        "sprite": {
+          "$ref": "#/$defs/slug"
+        },
+        "badge": {
+          "enum": [
+            "staff",
+            "diretoria"
+          ],
+          "default": "staff"
+        },
+        "isLead": {
+          "type": "boolean",
+          "default": false,
+          "description": "true only for the main-thread agent (chefe)."
+        },
+        "since": {
+          "type": "string",
+          "format": "date"
+        },
+        "personality": {
+          "type": "object",
+          "required": [
+            "traits",
+            "tone"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "traits": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "maxLength": 30
+              }
+            },
+            "tone": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "routineWeights": {
+              "type": "object",
+              "propertyNames": {
+                "enum": [
+                  "coffee",
+                  "copa-chat",
+                  "water",
+                  "window",
+                  "terrace",
+                  "arcade",
+                  "pingpong",
+                  "bathroom",
+                  "library",
+                  "sofa"
+                ]
+              },
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              }
+            }
+          }
+        },
+        "phrases": {
+          "$ref": "#/$defs/phrases"
+        }
+      }
+    },
+    "mapId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$",
+      "maxLength": 16,
+      "description": "Room/desk id as defined in docs/design/MAPA.md and assets/map/mapa.json (e.g. QUA, QUA-01, FL-D1)."
+    }
+  },
+  "x-crossFileRules": [
+    "agents[].agentType unique",
+    "agents[].department exists in departments[]; freelancer.homeRoom exists in mapa.json",
+    "agents[].desk exists in mapa.json desks[] and belongs to a room of the agent's department",
+    "no desk assigned to two agents",
+    "exactly one agent with isLead=true",
+    "every agent in QUADRO.md 'Equipe ativa' has an entry (npm run team:check)"
+  ]
+}
