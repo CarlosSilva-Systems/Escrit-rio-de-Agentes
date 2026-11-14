@@ -1,121 +1,98 @@
-# QA da Fase 1 — relatório (T-33)
+# QA da Fase 1 — relatório FINAL (T-33)
 
-> Autora: Teresa (QA) · Base: `MATRIZ-CA.md` (cobertura CA → teste). Rodado contra o working tree (sem commit). Bruno e Lívia aplicaram correções em paralelo durante a rodada: o estado de cada BUG abaixo vale para a última execução (campo "Estado").
+> Autora: Teresa (QA) · Base: `MATRIZ-CA.md`. Rodada final contra o working tree com backend e front estáveis, servidor real **parado** (`node dist/cli.js status` → "O Escritório não está ligado"), sem git. Os "commits" citados são os que contêm o código corrigido no histórico atual.
 
 ## 1. Veredito
 
-A Fase 1 está **pronta com ressalvas**: nenhum bug crítico, servidor sólido sob abuso (payloads hostis, rajada de 1 000 eventos, queda e volta do servidor, rotação de token, XSS), HUD e motor estáveis em todos os tamanhos/DPR testados, contraste 100 % conforme. Pendem 2 CAs "Must" com metade do critério não atendida (CA-13 aviso visual, CA-19 fechar clicando fora), 1 lacuna de CA-18 (aviso do Desktop) e itens manuais (sessão real do Desktop, CPU de 10 min).
+**PRONTO PARA APRESENTAR, com 2 ressalvas menores e itens manuais.** Nenhum bug aberto de severidade Alta ou Média. Servidor firme sob abuso, console limpo, contraste 100 %, CPU e latência dentro das metas (exceto o desvio conhecido do pior caso de renderização, R2).
 
-## 2. Bugs
+Ressalvas: (1) OBS-01 — um `404` no console a cada carga (provavelmente `/favicon.ico`; `index.html` não tem `<link rel="icon">`); (2) o pior caso de renderização (≥ 4 NPCs andando) custa ~15–17 % de um núcleo contra a meta de 10 % (desvio R2 já conhecido, não corrigido de propósito). Manuais que dependem do Carlos: sessão real do Desktop (T-32, gate G4), skill `rh-equipe` (T-29), CPU de 10 min.
 
-| ID | Sev. | CA | Resumo | Estado |
-|---|---|---|---|---|
-| BUG-01 | Alta | CA-13 | O painel **não mostra aviso** (arquivo e campo) quando `escritorio.json` é inválido. O servidor mantém o último válido e publica `diag`, mas nada renderiza `snapshot.diagnostics`. | Aberto (teste `test.fail` em `tests/e2e/fase1/content.spec.ts`) |
-| BUG-02 | Média | CA-19 | O painel do NPC não fecha clicando fora (só Esc ou botão Fechar). | Aberto (`test.fail`) |
-| BUG-03 | Baixa | CA-14 | Texto longo sem espaço (ex.: título de 60 caracteres) faz a gaveta da Equipe rolar na horizontal. | Aberto (`test.fail`) |
-| BUG-04 | Baixa | CA-03 | `token:rotate` só derruba WebSockets abertos na **próxima requisição HTTP** (o ping do WS não dispara a leitura dos arquivos); num escritório ocioso a sessão antiga segue recebendo dados. | Aberto (`it.fails` em `tests/integration/fase1/adversarial.test.ts`) |
-| BUG-05 | Baixa | CA-14/CA-23 | O teste **pré-existente** `tests/e2e/npcs.spec.ts :: CA-14: the team list reaches every NPC by keyboard…` passou a falhar no estado atual da árvore: depois de fechar o painel com Esc, 2 Esc a mais já não param o "Seguindo" (`following` continua visível). Hipótese: a cascata de Esc agora tem um passo extra (cartão de hover, ver OBS-04). Esperado: ajustar o teste (mais um Esc) ou encurtar a cascata. Local: `src/web/App.tsx:35-46`, `tests/e2e/npcs.spec.ts:~224`. | Aberto (Lívia decide; não alterei teste alheio) |
-| REG-01 | Média | CA-13 | `tests/integration/team.test.ts :: CA-13: a watcher on a not-yet-existing directory attaches when it is created` falha no estado atual: `writeFileAtomic` (`src/server/home/fsAtomic.ts:47`) lança ENOENT quando a pasta ainda não existe. Surgiu durante as correções paralelas do Bruno (verde no início desta rodada). | Aberto (Bruno) |
+## 2. Números da rodada final
 
-Reprodução e local provável:
+| Comando | Resultado real |
+|---|---|
+| `npm run check` | verde: lint + prettier + typecheck + `credits:check` + **474 unitários** (40 arquivos) + **205 integração** (17 arquivos) |
+| `QA_MEM_SECONDS=30 npx playwright test` | **83 passaram**, 0 falhas, 0 falhas esperadas (1,2 min) |
+| `node scripts/check-contrast.mjs` | 73 pares: 0 reprovam, 0 divergem > 0,05; 14 regras de `app.css` ok; `tokens.css` sincronizados |
+| `node scripts/verify-baseline.mjs` | **idêntico** |
+| `node scripts/perf/measure-fase1.mjs --seconds 60` | tabela do §5 |
 
-- **BUG-01.** Passos: abrir o painel; editar `~/.claude/equipe/escritorio.json` (cópia de teste) para JSON truncado ou `"agents": []`. Esperado: aviso visível "escritorio.json · agents …". Obtido: nada na tela (NPCs ficam corretos). Local: `src/web/store/appState.ts:138-139` guarda `diagnostics`; nenhum componente de `src/web/hud/**` nem `App.tsx` o lê. Sugestão: renderizar na `NoticeBar`/faixa de avisos com i18n.
-- **BUG-02.** Passos: Equipe → clicar num NPC → clicar no mapa. Esperado: painel fecha. Obtido: permanece. Local: `src/web/hud/npc/NpcPanel.tsx` (sem handler), `src/web/App.tsx:35-46` (só Esc), `src/web/OfficeView.tsx` `onNpcClick` ignora clique no vazio.
-- **BUG-03.** Passos: `title` de 60 `M` seguidos no `escritorio.json` → abrir Equipe. Esperado: sem rolagem lateral. Obtido: `scrollWidth - clientWidth` ≈ 276 px. Local: `src/web/styles/app.css:537` `.team-row__text` (adicionar `overflow-wrap: anywhere`).
-- **BUG-04.** Passos: abrir o painel, rodar `token:rotate`, não fazer nenhuma requisição. Esperado: socket fechado (4401) em poucos segundos. Obtido: segue aberto. Local: `src/server/http/auth/plugin.ts:99-103` (releitura só no `onRequest`, 1/s) e `src/server/app.ts:153-158`. Sugestão: timer `unref` de 1 s chamando `tokens.reloadIfChanged()`.
+Testes novos da rodada final: `tests/e2e/fase1/final.spec.ts` (7) e `tests/integration/fase1/session-limits.test.ts` (7).
 
-## 3. Observações e lacunas (sem teste vermelho)
+## 3. Bugs, regressões, lacunas: estado FINAL
 
-- **GAP-01 (Baixa)** `npm run credits:check` (CLAUDE.md, T-23) não existe em `package.json`; sugestão de script no §8.
-- **GAP-02 (Média)** CA-18: o aviso "sessões do Desktop não detectadas" não existe na interface; a gate G4/T-32 (sessão real) segue manual.
-- **OBS-01** `GET /assets/sprites/manifest.json` e `/assets-private/sprites/manifest.json` dão 404 em todo carregamento e o navegador registra "Failed to load resource" como erro no console (arte opcional ausente). Único ruído de console encontrado; o resto são `ERR_CONNECTION_REFUSED` esperados durante quedas do servidor. Nenhum aviso (warning).
-- **OBS-02** Não há teto de Freelancers no servidor: 300 tipos desconhecidos viram 300 NPCs no `/api/state` (< 500 kB).
-- **OBS-03** O mapa só tem assentos para ~15 visitantes: de 60 Freelancers simultâneos o mapa desenha 15 (a lista da Equipe lista todos). Fps e responsividade seguem ok.
-- **OBS-04** Com foco numa linha da Equipe, o drawer precisa de 3 Esc (painel, cartão, gaveta). Coerente com o desenho, pode parecer lento.
-- **OBS-05** `.btn:disabled` (texto `text-disabled` sobre `bg-700`) dá 2,97:1; o guia só garante ≥ 3 sobre `bg-800` (3,61). Isento pela WCAG (componente inativo).
-- Os scripts citados na arquitetura (`scripts/perf/measure-cpu.ps1`, `typeperf`) foram substituídos por `scripts/perf/measure-fase1.mjs` (CPU via CDP e `Get-Process`).
+Todos os testes que antes eram "falha esperada" (`test.fail`/`it.fails`) agora são testes normais **e passam**: foram a prova das correções.
 
-## 4. Medições (Edge 157 headless, GPU real, janela de 60 s, 1920×1080, DPR 1; servidor de teste em porta aleatória e home temporária)
+| ID | Sev. | CA | Problema | Estado | Onde foi corrigido | Teste que prova |
+|---|---|---|---|---|---|---|
+| BUG-01 | Alta | 13 | sem aviso visual quando `escritorio.json` é inválido | **CORRIGIDO** | `8073bc5` (`src/web/hud/DiagnosticsBanner.tsx`, `diagnostics.ts`), `aa17d71` (código/params no `Diagnostic`) | `content.spec.ts :: CA-13: BUG-01 the panel must show a warning naming the file and the field…`; novo `final.spec.ts :: CA-13: the diagnostics banner follows escritorio.json live…` (ausente → nota; válido → nada; lixo × 4 → aviso com "escritorio.json"; campo `agents`; dispensar; valor hostil como texto) |
+| BUG-02 | Média | 19 | painel do NPC não fecha clicando fora | **CORRIGIDO** | `901f1f8` (`src/web/hud/npc/NpcPanel.tsx`) | `content.spec.ts :: CA-19: BUG-02 clicking outside the NPC panel…` |
+| BUG-03 | Baixa | 14 | palavra longa estoura a gaveta da Equipe | **CORRIGIDO** | `2f857b1` (`src/web/styles/app.css:543`, `overflow-wrap: anywhere`) | `content.spec.ts :: CA-14: BUG-03 an unbroken 60-character title…` |
+| BUG-04 | Baixa | 3 | `token:rotate` só derrubava sockets na próxima requisição HTTP | **CORRIGIDO** | `7e82b0c` (`src/server/app.ts:165`, `rotationWatch` a cada 1 s com clientes) | `adversarial.test.ts :: CA-03: BUG-04 token:rotate must close open WebSockets by itself…`; `resilience.spec.ts :: CA-03: token rotation while the page is open…` |
+| BUG-05 | Baixa | 14/23 | `npcs.spec.ts :: CA-14: the team list reaches every NPC by keyboard…` falhava (cascata de Esc) | **CORRIGIDO** (teste volta a passar; sem mudança de comportamento exigida) | commit exato não identificado (provável `901f1f8`) | o próprio teste, verde nas duas últimas rodadas |
+| REG-01 | Média | 13 | `writeFileAtomic` com ENOENT em pasta ainda inexistente | **CORRIGIDO** | `5d77c5f` (um único escritor atômico) | `tests/integration/team.test.ts :: CA-13: a watcher on a not-yet-existing directory attaches when it is created` |
+| REG-02 | Baixa | 3 | cookie sem `Max-Age=604800` (a janela mudou) | **CORRIGIDO / teste atualizado**: a regra agora é 8 h ociosas e 24 h absolutas | `b9621f4` / `7e82b0c` (`src/server/http/auth/sessions.ts`; commit exato não verificado) | novo `session-limits.test.ts :: CA-03: the cookie is HttpOnly, SameSite=Strict, Path=/ and lives at most 8 h`; `auth.test.ts :: CA-03: ticket -> cookie…` |
+| GAP-01 | Baixa | 5 | faltava `npm run credits:check` | **CORRIGIDO** | `a6ce5e2` (`scripts/check-credits.mjs`, no `npm run check`) | roda dentro do `check` (verde); `compliance.test.ts :: CA-05: …` |
+| GAP-02 | Média | 18 | aviso "sessões do Desktop não detectadas" inexistente | **CORRIGIDO** (aviso discreto e dispensável; a sessão real segue manual) | `901f1f8` (`desktopHint.ts`), `8073bc5` (`DiagnosticsBanner.tsx`) | `src/web/hud/desktopHint.test.ts`; `final.spec.ts :: CA-18: the Desktop-sessions hint is quiet…` (aparece como nota informativa, nunca como aviso) |
+| OBS-01 | Baixa | — | 1 erro de console "Failed to load resource 404" a cada carga | **ABERTO** | — | `final.spec.ts :: console: a full tour…` tolera só esse 404 (e falha em qualquer outro). Provável `/favicon.ico` (a página não declara ícone; `/favicon.ico` e `/assets/sprites/manifest.json` dão 404). Sugestão: `<link rel="icon" href="data:,">` |
+| OBS-02 | Baixa | 17 | sem teto de Freelancers | **CORRIGIDO** | `d7a7363` (`MAX_FREELANCERS = 12`, excedente contado em `office.droppedFreelancers`) | `adversarial.test.ts :: CA-15: 300 distinct unknown agent types… are capped at 12 Freelancers`; `viewport.spec.ts :: CA-06: 60 simultaneous Freelancers…` |
+| OBS-03 | — | 17 | mapa só desenha ~15 visitantes | **SUPERADO** pelo teto de 12 (todos cabem) | `d7a7363` | idem |
+| OBS-04 | — | 23 | 3 Esc para fechar a gaveta com foco numa linha | **MANTIDO (desenho)** | — | `content.spec.ts :: CA-23: Tab / Shift+Tab… Esc unwinds panel -> drawer` |
+| OBS-05 | — | 24 | `.btn:disabled` dá 2,97:1 sobre `bg-700` | **MANTIDO (isento pela WCAG: componente inativo)** | — | `contrast.test.ts` marca `text-disabled` como isento |
 
-CPU = % de **um** núcleo, soma de todos os processos do navegador (renderer + GPU + browser + utilitários). Aba oculta simulada via `visibilityState` (limitação herdada do S-02).
+**Bugs novos na rodada final: nenhum** (além do OBS-01, já conhecido).
+
+## 4. Caça final aos fluxos novos
+
+| Fluxo | Resultado | Teste |
+|---|---|---|
+| Logout pelo menu (confirmação, Esc cancela) → tela "abra pelo atalho"; cookie removido; outra aba do mesmo navegador cai na mesma tela; hub com 0 clientes; cookie antigo repetido à mão = 401; `POST /api/auth/logout` repetido não dá 5xx | OK | `final.spec.ts` (1º), `session-limits.test.ts` |
+| Reabrir por ticket: entra, URL limpa (sem ticket), o mesmo ticket 2× = 401 | OK | `final.spec.ts` (1º) |
+| Logout com o servidor parado | descarta a sessão local e mostra a tela do atalho | `final.spec.ts` (2º) |
+| `POST /api/auth/logout` sem CSRF → ≥ 400; Origin estranho → 403 | OK | `session-limits.test.ts` |
+| Idioma + som por `PATCH /api/config` com **duas abas** simultâneas | os dois campos sobrevivem (`lang=en`, `sound=true`); cada PATCH leva CSRF e volta 200; navegador novo (sem escolha local) abre no idioma salvo no servidor | `final.spec.ts` (3º) |
+| `PATCH /api/config` com idioma inválido, campo desconhecido, nome de projeto com `..`, sem CSRF, Origin estranho | 400 / 400 / 400 / ≥ 400 / 403; nada muda | `final.spec.ts` (4º) |
+| Banner de diagnóstico em tempo real (ausente → válido → lixo ×4 → corrigido → campo inválido → dispensado → valor hostil) | acompanha sem recarregar; mantém os 16 NPCs; XSS inerte | `final.spec.ts` (5º) |
+| Expiração: 8 h ociosa, 24 h absoluta, `peekKey` não renova, `remove()`, cookies lixo, persistência × restart | OK (relógio injetado) | `session-limits.test.ts` |
+| `token:rotate` com a página aberta | tela do atalho, 0 clientes, sem laço | `resilience.spec.ts`, `adversarial.test.ts` |
+| 60 Freelancers; JSON hostil no hook; rajada de 1 000 eventos | teto de 12, ≤ 30 fps, sem 5xx | `viewport.spec.ts`, `adversarial.test.ts` |
+| Console durante um passeio completo (hooks, painéis, atalhos, idioma, logout) | sem avisos; único erro = OBS-01 | `final.spec.ts` (último) |
+
+Observação (não é bug): o som ligado fica salvo no servidor, mas a interface sempre abre **mudo** (CA-77: som começa mudo); "volumes e escolhas persistem" é Could da fase 4.
+
+## 5. Medições (Edge 157 headless, GPU real, 60 s por cenário, 1920×1080, DPR 1; servidor de teste em porta aleatória e home temporária)
+
+CPU = % de **um** núcleo, soma de todos os processos do navegador. Aba oculta simulada por `visibilityState`.
 
 | Cenário | CPU total | renderer + GPU | fps | máx. quadros em 1 s | Alvo | Resultado |
 |---|---|---|---|---|---|---|
-| S1 parado, aba visível (16 NPCs ociosos) | 2,76 % | 1,52 + 1,09 | 6 | 7 | ≤ 5 % (M-02) | OK |
-| S2 parado, aba oculta | 0,24 % | 0,14 + 0,02 | 0 | 0 (0 quadros) | ≤ 1 % (M-03) | OK |
-| S3 realista: 5 NPCs trabalhando (hooks reais a cada 1 s) | 3,48 % | 1,88 + 1,50 | 6 | 7 | ≤ 5 % | OK |
-| S8 realista: 2 NPCs andando (faixa de 20 fps) | 8,95 % | 4,13 + 4,07 | 19,5 | 21 | — | informativo |
-| S4 realista: 5 NPCs andando (faixa de 30 fps) | 15,34 % | 7,44 + 7,81 | 28,6 | 29 | — (pior caso ≤ 10 %) | acima do alvo do pior caso |
-| S6 pior caso: 20 andando + chuva + noite | 15,71 % | 7,63 + 8,02 | 28,8 | 29 | ≤ 10 % (R2) | **desvio conhecido confirmado** (spike: 14,5 %) |
-| S5 5 trabalhando com atividade, aba oculta | 0,47 % | 0,30 + 0,06 | 0 | 0 | ≤ 1 % | OK |
-| S7 pior caso, aba oculta | 0,22 % | 0,14 + 0,02 | 0 | 0 | ≤ 1 % | OK |
+| S1 parado, visível (16 NPCs ociosos) | 3,25 % | 1,79 + 1,28 | 5,7 | 7 | ≤ 5 % (M-02) | OK |
+| S2 parado, aba oculta | 0,31 % | 0,15 + 0,02 | 0 | 0 | ≤ 1 % (M-03) | OK |
+| S3 realista: 5 NPCs trabalhando (hooks reais) | 4,15 % | 2,13 + 1,88 | 5,4 | 6 | ≤ 5 % | OK |
+| S8 realista: 2 NPCs andando (faixa de 20 fps) | 10,46 % | 5,25 + 5,09 | 18 | 19 | — | informativo |
+| S4 realista: 5 NPCs andando (faixa de 30 fps) | 15,36 % | 7,52 + 7,71 | 26,3 | 28 | — | acima da meta de 10 % do pior caso |
+| S6 pior caso: 20 andando + chuva + noite | 17,32 % | 8,64 + 8,59 | 26,4 | 28 | ≤ 10 % (R2) | **desvio conhecido confirmado** (spike: 14,5 %) |
+| S5 5 trabalhando com atividade, aba oculta | 0,51 % | 0,33 + 0,06 | 0 | 0 | ≤ 1 % | OK |
+| S7 pior caso, aba oculta | 0,25 % | 0,16 + 0,03 | 0 | 0 | ≤ 1 % | OK |
 
-Leitura: o custo é quase todo da **faixa de fps** (6 fps parado ≈ 3 %, 20 fps ≈ 9 %, 30 fps ≈ 15 %), não do número de NPCs: com 5 NPCs andando já se paga o mesmo que com 20. Nenhum cenário passa de 30 quadros em 1 s (M-01 ok; máx. 29).
+Leitura: o custo vem da **faixa de fps** (≈ 6 fps ≈ 3–4 %; 20 fps ≈ 10 %; 30 fps ≈ 15–17 %), não do número de NPCs. M-01 ok (máx. 28 quadros em 1 s, nunca > 30). Esta rodada ficou ~1–2 pontos acima da anterior (carga da máquina), a conclusão não muda.
 
 | Métrica | Medido | Alvo | Resultado |
 |---|---|---|---|
-| M-05 latência hook → NPC "trabalhando" (50 amostras, medida dentro da página) | p50 140 ms · **p95 143 ms** · máx. 159 ms (e2e: p95 128 ms, máx. 140 ms) | p95 ≤ 1 s, máx. 2 s | OK |
-| M-04 CPU do servidor ocioso (1 navegador, 59 s) | **0,05 %** | ≤ 2 % | OK |
-| M-04 memória do servidor | 92,9 → 79,1 MB de working set em 59 s (sem crescimento); 8 h não medidas | < 50 MB em 8 h | sem sinal de vazamento |
-| Subida do servidor (5 partidas a frio do bundle) | mediana **849 ms** (820–902 ms) até a primeira resposta HTTP | informar | — |
-| Bundle web (gzip) | JS **140,2 kB**, CSS 3,1 kB, total 151,0 kB | ≤ 400 kB | OK |
-| Memória da página, 16 NPCs trabalhando + Freelancers (~20 no mapa), hooks e painéis abrindo/fechando | ver §5 | estável | ver §5 |
+| M-05 hook → NPC "trabalhando" (50 amostras, dentro da página) | p50 140 ms · **p95 142 ms** · máx. 144 ms (e2e: p95 128 ms, máx. 139 ms; a amostra "mín. 0" do script é artefato do poller) | p95 ≤ 1 s, máx. 2 s | OK |
+| M-04 CPU do servidor ocioso (1 navegador, 59 s) | **0,11 %** | ≤ 2 % | OK |
+| M-04 memória do servidor | 93,0 → 79,6 MB em 59 s | < 50 MB em 8 h | sem sinal de vazamento (8 h não medidas) |
+| Subida do servidor (5 partidas a frio) | mediana **950 ms** (931–1206 ms) até a 1ª resposta HTTP | informar | — |
+| Bundle web (gzip) | JS **143,3 kB**, CSS 3,3 kB, total 154,3 kB | ≤ 400 kB | OK |
+| Memória da página, 16 trabalhando + Freelancers + painéis (`QA_MEM_SECONDS=30` na rodada; 180 s na anterior: heap 5,2 → 6,8 MB, DOM 106 nós, 192 listeners, constantes) | estável | estável | OK |
 
-Não medido: CPU de 10 min (rodar `node scripts/perf/measure-fase1.mjs --seconds 600`), Edge com janela (GPU real do monitor), aba oculta de verdade, servidor por 8 h.
+Não medido: CPU de 10 min, Edge com janela, aba oculta real, servidor por 8 h.
 
-## 5. Memória / vazamentos (teste `tests/e2e/fase1/memory.spec.ts`, `QA_MEM_SECONDS`, padrão 180 s)
+## 6. Contraste WCAG
 
-180 s com 16 NPCs trabalhando o tempo todo + Freelancers entrando/saindo (~20 no mapa), 6 eventos de ferramenta por rodada e Equipe/painel abrindo e fechando (GC forçado antes de cada amostra):
+`node scripts/check-contrast.mjs` + `tests/integration/fase1/contrast.test.ts`: 73 pares do GUIA-VISUAL §4, **0 reprovados, 0 divergentes** (maior diferença para os números à mão da Bianca: 0,006). Menor texto: `danger-text` / `bg-700` 4,83; `ink` / `dept-qualidade-base` 4,94. Menor UI: `border-strong` / `bg-700` 3,37. Negativo documentado confere (`meter-red` como texto em `bg-700` = 4,17 e não é usado). 14 regras de `app.css` ≥ 4,5 (desabilitado isento, OBS-05). Não coberto: texto desenhado dentro do canvas.
 
-| t (s) | heap da página (MB) | nós DOM | listeners | heap do servidor* (MB) | clientes WS |
-|---|---|---|---|---|---|
-| 0 | 5,2 | 103 | 192 | 80,0 | 1 |
-| 60 | 6,5 | 106 | 192 | 50,9 | 1 |
-| 121 | 6,7 | 106 | 192 | 55,1 | 1 |
-| 181 | 6,8 | 106 | 192 | 57,8 | 1 |
-| 191 (após esvaziar Freelancers) | 6,7 | 106 | 192 | 50,6 | 1 |
+## 7. Pendências manuais
 
-Heap da página +0,5 MB depois do aquecimento (platô), **DOM e listeners constantes** (sem vazamento de listeners ao longo de 4 quedas do servidor também: §7). *heap do servidor em processo junto do runner, só indicativo.
-
-## 6. Contraste WCAG (`node scripts/check-contrast.mjs`, teste `tests/integration/fase1/contrast.test.ts`)
-
-- 73 pares do GUIA-VISUAL §4 (4.1 texto, 4.2 fundos coloridos, 4.3 UI/foco): **0 reprovados**, **0 divergentes** (maior diferença para os números da Bianca: 0,006; o limite era 0,05).
-- Menor texto: `danger-text` sobre `bg-700` 4,83; `ink` sobre `dept-qualidade-base` 4,94; `terra-300` sobre `bg-700` 4,96. Menor UI: `border-strong` sobre `bg-700` 3,37.
-- Negativo documentado confere: `meter-red` como texto sobre `bg-700` dá 4,17 (< 4,5) e o `app.css` não o usa como texto.
-- 14 regras `color: var(--token)` de `app.css` verificadas (pior fundo quando não declara): todas ≥ 4,5 (exceto o desabilitado isento, OBS-05).
-- `docs/design/tokens.css` e `src/web/styles/tokens.css` têm os mesmos valores de cor (comparação por valor, ignorando a formatação do Prettier).
-- Não coberto: texto desenhado dentro do canvas (placas/crachás em sprite) — só vale a tabela 4.2 do guia.
-
-## 7. Caça a bugs: o que foi tentado
-
-| Cenário | Resultado | Onde |
-|---|---|---|
-| Matar/religar o servidor 4× com a página aberta; "Tentar agora" | Recupera sozinho; 1 socket aberto na página e 1 cliente no hub (sem vazamento) | `resilience.spec.ts` |
-| Token rotacionado com a página aberta; cookie forjado | Tela "abra pelo atalho", sem laço de reconexão; sem WS com cookie falso | `resilience.spec.ts` (+ BUG-04) |
-| 3 abas simultâneas; fechar uma | Todas sincronizadas; hub conta certo | `resilience.spec.ts` |
-| 16 NPCs trabalhando + Freelancer indo e vindo 8× | ≤ 30 fps, sem erro de console, volta a ocioso, sem fantasmas | `resilience.spec.ts` |
-| Rajada de 1 000 eventos (HTTP e UI) | 1 000 aceitos (204), contadores exatos, ring ≤ 500, página responsiva, ≤ 30 fps | `adversarial.test.ts`, `viewport.spec.ts` |
-| 17 corpos malformados/gigantes (aninhamento de 50 000 níveis, NUL, UTF-8 inválido, chaves duplicadas, `__proto__`…), limite exato de 1 MB | Nunca 5xx (202/204/413); sem poluição de protótipo | `adversarial.test.ts` |
-| `agent_type` HTML/RTL/NUL/10 000 caracteres/`constructor`… | Vira "unknown" ou nome seguro; nunca markup | `adversarial.test.ts` |
-| XSS em apelido, nome, cargo, estúdio, departamento, pasta do `cwd`, assunto de tarefa, aviso de novo membro | Tudo como texto; nada executa; nenhum nó injetado; nenhum diálogo | `content.spec.ts` |
-| Nomes longos (24/60/60) | Cartão dentro da janela, sem rolagem da página (BUG-03 só para palavra sem espaço) | `content.spec.ts` |
-| Zoom/pan extremos (80 ticks de roda, 5 000 px de arraste, +/- ×30) e parâmetros de URL absurdos | Zoom sempre 2–4×, mapa sempre visível, página íntegra | `viewport.spec.ts` |
-| 1280×720 a 2560×1440 × DPR 1/1,25/1,5; redimensionar em movimento até 390×844 | Escala inteira, canvas = caixa × DPR, sem barras, segue desenhando | `viewport.spec.ts` |
-| Tab/Shift+Tab em tudo (com gaveta e painel abertos); Esc em cascata | Foco visível em todas as paradas, sem armadilha | `content.spec.ts` |
-| `prefers-reduced-motion` | 0 animações CSS em execução; status continua em texto | `viewport.spec.ts` |
-| Trocar idioma com painel e cartão abertos | Traduz no lugar, sem fechar | `content.spec.ts` |
-| Aba oculta com hooks chegando; retomada | 0 quadros ocultos; NPC já "trabalhando" ao voltar; sem teletransporte | `viewport.spec.ts` |
-| `escritorio.json` e QUADRO.md editados com lixo em tempo real | Mantém o último válido e os 16 NPCs; arquivo corrigido é relido (BUG-01: sem aviso visual) | `content.spec.ts` |
-| WebSocket: 80 mensagens/s, 21º cliente, binário/lixo/tipos desconhecidos | 1008, 1013 e ignorado, respectivamente; o servidor segue servindo | `adversarial.test.ts` |
-| Rede/privacidade (CA-09, CA-64) | Só conexões 127.0.0.1; nenhum processo `claude`; canário não vaza | `compliance.test.ts`, `adversarial.test.ts`, `content.spec.ts` |
-
-## 8. Pendências e sugestões
-
-- Manuais: sessão real do Desktop (T-32/G4), skill `rh-equipe` (T-29), CPU de 10 min, Edge com janela.
-- Marcas de falha esperada: ao corrigir cada BUG, remover `test.fail(...)`/`it.fails` do teste correspondente (ele passará a ser um teste normal).
-- Sugestões para o `package.json` (não editado por mim): `"qa:contrast": "node scripts/check-contrast.mjs"`, `"perf:fase1": "node scripts/perf/measure-fase1.mjs --seconds 60"`, `"credits:check"` (GAP-01), e rodar o e2e com `QA_MEM_SECONDS=30` em CI curto.
-- O Playwright apaga `test-results/` a cada execução (os resultados de performance vão para `test-results/perf-fase1.json` por padrão: use `--out` para guardá-los noutro lugar).
-
-## 9. Estado final desta rodada (árvore em movimento)
-
-`npm run test:unit` 456 verdes; `test:int` 186 verdes + 1 falha esperada, **2 vermelhos que não são meus** (REG-01 acima e `tests/integration/auth.test.ts :: CA-03: ticket -> cookie ...`, REG-02, para o Bruno); `npm run lint` pega só `prettier` em `src/cli/client.ts` (arquivo em edição do Bruno); Playwright: 68 verdes de 70 + 5 falhas esperadas (BUG-01/02/03 e 2 outros marcados), 1 falha real (BUG-05) e 1 intermitente de rede local no DPR 1,5 (passou ao repetir). `node scripts/verify-baseline.mjs` -> idêntico.
+Sessão real do Desktop e aplicar o diff no `settings.json` (T-32, gate G4); skill `rh-equipe` (T-29); CPU de 10 min (`node scripts/perf/measure-fase1.mjs --seconds 600`); Edge com janela; servidor por 8 h. Resultado de performance vai para `test-results/` por padrão e o Playwright limpa essa pasta: use `--out`.
