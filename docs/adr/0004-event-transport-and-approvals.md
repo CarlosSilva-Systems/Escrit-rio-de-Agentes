@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Eventos chegam por um **hook do tipo `command`** próprio (`escritorio-hook.cjs`, Node sem dependências) que faz POST para `127.0.0.1:3200` com um token só de hooks. Em três níveis: **Nível 0 (padrão, sem mexer no settings.json):** sessões abertas pelo painel recebem os hooks via `--settings <arquivo>`; sessões do Desktop/terminal são observadas lendo os JSONL (sem aprovações, atraso ~1–2 s). **Nível 1 (recomendado, com diff + OK do Carlos):** acrescentar nossos hooks ao `settings.json` ao lado dos do Pixel Agents (nada é removido) → Desktop em tempo real e com aprovações. **Nível 2 (fase 3, opcional):** envolver a statusLine existente. `PermissionRequest` é bloqueante com prazo (60 s padrão) e, em qualquer falha, devolve "sem decisão" (fluxo normal do Claude). O diff exato está abaixo — **não aplicado**.
 
-- Status: Proposed (settings.json changes require Carlos's explicit OK)
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur; approval: Carlos
 

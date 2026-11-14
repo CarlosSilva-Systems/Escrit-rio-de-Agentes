@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Servidor só em `127.0.0.1:3200`. O token longo (256 bits) fica em `~/.escritorio-equipe/token` com ACL restrita (herança removida; acesso apenas ao usuário, SYSTEM e Administradores) e **nunca vai ao navegador**: o lançador troca o token por um **ticket de uso único (60 s)**, abre `/auth/callback?ticket=…`, o servidor cria cookie de sessão `HttpOnly; SameSite=Strict` e redireciona para `/` sem nada na URL. Toda rota exige sessão; ações exigem `Origin` correto + cabeçalho CSRF; WebSocket checa `Origin`/`Host`/cookie. Hooks usam outro token. Projetos são identificados por **nome de pasta validado**, resolvidos por caminho real canônico dentro de "7 - DEV". Nenhum comando vem do navegador. Terminal somente leitura por padrão. O escritório nunca lê o token OAuth do Claude.
 
-- Status: Proposed
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur; reviewers: Sérgio (revisor-seguranca), Pedro (pentester); approval: Carlos
 

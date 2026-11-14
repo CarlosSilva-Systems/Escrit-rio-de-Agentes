@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Um único pacote npm (sem workspaces), Node 26 LTS (o que o Carlos já tem), servidor Fastify 5 + WebSocket, front React 19 + Vite 8 com motor Canvas 2D próprio, TypeScript 6.0.3 (o TS 7 ainda não é suportado pelo typescript-eslint), Vitest 5 + Playwright 1.65 usando o Edge instalado, zod 4 para contratos. Poucas dependências, todas fixadas em versão exata. Nada global.
 
-- Status: Proposed
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur; approval: Carlos
 

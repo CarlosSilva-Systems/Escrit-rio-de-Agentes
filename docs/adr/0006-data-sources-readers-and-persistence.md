@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Estado vivo em memória no servidor; persistência mínima em `~/.escritorio-equipe/` (fora do OneDrive), com escrita atômica. Fontes: (1) **PLANO.md/TAREFAS.md** (parser puro e tolerante, contrato em `docs/ARQUITETURA.md` §8) — fonte principal das tarefas; (2) **hooks** Subagent*/Task*/ferramentas — sobrepõem o status "ao vivo"; (3) **JSONL** de `~/.claude/projects` — tokens (dedupe por `message.id`, subagentes por `.meta.json`), fallback de eventos e conteúdo do chat; (4) **uso.json** gravado pela nossa statusLine (Node puro). Só agregados são persistidos.
 
-- Status: Proposed
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur; approval: Carlos
 

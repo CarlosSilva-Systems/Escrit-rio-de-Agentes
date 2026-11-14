@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Em vez de um fork completo do Pixel Agents 1.6.0, criamos um repositório novo e **copiamos seletivamente** apenas trechos de código MIT úteis (com cabeçalho de atribuição e registro no `NOTICE.md`), usando o restante como referência. Nenhuma arte não-personagem do Pixel Agents é reutilizada. Isso **desvia da letra do pedido** ("partir de uma cópia") e precisa do OK do Carlos.
 
-- Status: Proposed (awaiting Carlos's approval)
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur (architect); approval: Carlos
 

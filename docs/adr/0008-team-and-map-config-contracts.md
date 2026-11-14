@@ -2,7 +2,7 @@
 
 > **Resumo (pt-BR):** Dois arquivos de configuração versionados por um campo `schema`: `~/.claude/equipe/escritorio.json` (quem é quem: agentes, departamentos, mesas simbólicas, frases, mascotes, regra do Freelancer) e `assets/map/mapa.json` no repositório (o andar: salas, mesas com coordenadas, assentos, pontos de interesse, luzes, quadros, vagas de sala de projeto). O MAPA.md da Bianca é convertido para o `mapa.json`. Mesas são ligadas pelo **id do mapa da Bianca** (`PLN-02`), então nomes/cargos mudam sem mexer no mapa e vice-versa. Ambos são validados por JSON Schema gerado do zod; inválido → aviso + último válido.
 
-- Status: Proposed
+- Status: Accepted (2026-11-13, approved by the project owner)
 - Date: 2026-11-12
 - Deciders: Artur, Bianca (map content); approval: Carlos
 
