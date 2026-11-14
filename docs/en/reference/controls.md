@@ -34,7 +34,7 @@ Single-letter shortcuts never fire while you type in a text field or the termina
 
 ## Top bar
 
-Team (opens the drawer with a Follow button per NPC), Sound (on/off), Language (pt-BR ⇄ en, no reload), Settings (Credits, Keyboard shortcuts).
+Team (opens the drawer with a Follow button per NPC), Sound (on/off), Language (pt-BR ⇄ en, no reload), Settings (Credits, Keyboard shortcuts, Sign out, which asks for confirmation).
 
 ## Developer URL parameters
 

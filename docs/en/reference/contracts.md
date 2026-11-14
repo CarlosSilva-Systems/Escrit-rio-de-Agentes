@@ -60,6 +60,19 @@ Top-level keys: `schema`, `tileSize` (16), `cols` (64), `rows` (52), `tilesets`,
 
 Defined and tested but not used until Phase 3. `{schema: "uso/v1", updatedAt, source?, sessionId?, model?, windows: {fiveHour?, sevenDay?}, spendLimit?, extraWindows?}`, where each window is `{usedPercentage, resetsAt (epoch seconds), observedAt?, stale?}`. Out-of-range percentages are accepted by the parser and clamped by the interface.
 
+## Diagnostic codes
+
+The server publishes problems as diagnostics (`file`, optional `path`, `severity`, `code`) and never lets them break the office. The interface turns each `code` into a translated sentence (23 codes). A missing `escritorio.json` is a calm note; an invalid one is a warning strip naming the field. Details never include file content.
+
+| Group | Codes |
+|---|---|
+| `escritorio.json` | `team.json-invalid`, `team.file-too-large`, `team.field-invalid`, `team.schema-invalid`, `team.agent-duplicate`, `team.desk-duplicate`, `team.department-unknown`, `team.department-duplicate`, `team.lead-count` |
+| Against the map and `QUADRO.md` | `team.desk-missing-in-map`, `team.desk-wrong-room`, `team.room-missing-in-map`, `team.npc-without-agent`, `team.agent-without-npc`, `team.desk-null-not-provisional`, `team.more-issues` (the last four share one generic sentence) |
+| `QUADRO.md` | `quadro.file-missing`, `quadro.no-agents`, `quadro.row-invalid`, `quadro.agent-duplicate`, `quadro.too-many` |
+| Map and office | `map.unreadable`, `office.freelancer-limit` |
+
+Any other code falls back to a generic "Notice about <file>" sentence that points to the server log.
+
 ## Related
 
 - [Customize the NPCs](../how-to/customize-npcs.md)

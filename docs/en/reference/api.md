@@ -23,7 +23,9 @@ Every request must carry the exact `Host` (`127.0.0.1:<port>` or `localhost:<por
 | `POST /api/auth/ticket` | bearer | Issues a ticket: `{ticket, expiresInSec: 60}`. |
 | `GET /api/health` | bearer or session | `{ok: true, version}`. |
 | `GET /api/health/proof?n=<nonce>&k=master\|hook` | public | `{proof}`: HMAC-SHA256 of the nonce keyed by the token, so clients can verify the server's identity before sending a credential. |
-| `POST /api/auth/logout` | session + CSRF | Forgets the session, expires the cookie, closes its sockets (`204`). No button uses it yet. |
+| `POST /api/auth/logout` | session + CSRF | Forgets the session, expires the cookie, closes its sockets (`204`). Used by Settings → Sign out. |
+| `GET /api/config` | session | The public settings (`lang`, `sound`, `music`, `quality`, `approvalDeadlineSec`, `chatMode`, `npcWorkPlace`). |
+| `PATCH /api/config` | session + CSRF | Changes settings from a closed list. The body is a strict `ConfigPatchSchema` (unknown or empty fields: `400`). Saved atomically to `config.json`; returns the full updated settings. Server and CLI messages switch to the saved language at once. |
 | `GET /api/session` | session | `{csrfToken, lang}`. |
 | `POST /api/admin/shutdown` | bearer | Graceful stop for `escritorio stop` (`202`). |
 | `GET /api/state` | session | `OfficeSnapshot`: team, NPCs, approvals, projects, activity (last 200), public config, diagnostics. |
@@ -32,7 +34,7 @@ Every request must carry the exact `Host` (`127.0.0.1:<port>` or `localhost:<por
 | `POST /api/hooks/v1/claude` | hook | Receives a hook payload. `204`: accepted, duplicate or ignored event. `202`: unusable body (counted as `ingest.invalid`). Never a 4xx for content problems. Body up to 1 MB. |
 | static files | session | The web app from `dist/web`. |
 
-Planned for later phases and **not implemented yet**: `PATCH /api/config` (the browser calls it when you change language or sound, and ignores a failure; the language is kept in the browser's `localStorage`), projects, chat, approvals, plan, usage and tokens routes.
+Planned for later phases and **not implemented yet**: projects, chat, approvals, plan, usage and tokens routes.
 
 ### Limits
 
@@ -61,7 +63,7 @@ Client to server: only `{"t":"ping"}` (strict schema; other frames are ignored).
 | `1013` | More than 20 simultaneous clients |
 | `4401` | Session logged out or invalidated (token rotation) |
 
-Frames from the client are limited to 1 KiB. A client that cannot keep up (more than 4 MB buffered) is dropped and reconnects with a fresh snapshot.
+There is no WebSocket message for settings: a change made in one tab reaches other open tabs only when they reload. Frames from the client are limited to 1 KiB. A client that cannot keep up (more than 4 MB buffered) is dropped and reconnects with a fresh snapshot.
 
 ## Related
 

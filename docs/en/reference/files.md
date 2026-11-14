@@ -10,7 +10,7 @@ Created on first start; override with `ESCRITORIO_HOME`. It lives outside OneDri
 |---|---|---|
 | `token` | Master token, 256 bits (43 base64url characters). Used by the CLI to ask the server for tickets and to stop it. Never sent to the browser. | yes |
 | `hook-token` | Hook token, 256 bits. Used only by the hook script towards `/api/hooks/v1/claude`. | yes |
-| `config.json` | Public settings (closed list): `lang` (`pt-BR`/`en`), `sound`, `music`, `quality` (`auto`/`high`/`medium`/`low`), `approvalDeadlineSec` (10–300, default 60), `chatMode` (per project), `npcWorkPlace` (`desk`/`projectRoom`/`auto`). An invalid field falls back to its default and a warning is logged; the file is not rewritten. `lang` also sets the language of CLI and server messages. | no |
+| `config.json` | Public settings (closed list): `lang` (`pt-BR`/`en`), `sound`, `music`, `quality` (`auto`/`high`/`medium`/`low`), `approvalDeadlineSec` (10–300, default 60), `chatMode` (per project), `npcWorkPlace` (`desk`/`projectRoom`/`auto`). Written by `PATCH /api/config` (language and sound switches in the interface). An invalid field falls back to its default and a warning is logged; the file is not rewritten. `lang` also sets the language of CLI and server messages. | no |
 | `runtime.json` | `{pid, port, startedAt, version}` of the running server. Removed on clean shutdown. | no |
 | `sessions.json` | Browser sessions as SHA-256 hashes with creation and last-use times (never the cookie itself). Bound to the token generation. | no |
 | `bin\` | Hook scripts copied by `hooks:sync` (`escritorio-hook.cjs`). | no |

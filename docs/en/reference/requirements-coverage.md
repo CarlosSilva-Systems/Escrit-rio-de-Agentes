@@ -22,13 +22,13 @@ Phase 1 is covered by acceptance criteria CA-01 to CA-25. The authoritative, tes
 | 10 | pt-BR default, English without reload, same keys | Automated |
 | 11 | Every fixed room present, department colours | Automated |
 | 12 | Exactly 16 NPCs with correct names and titles | Automated; approval of the name list (gate G1) is yours |
-| 13 | Missing or invalid `escritorio.json` gives a warning and keeps the last valid | Automated; the on-screen warning is in the code and its expected-failure test marker still has to be removed |
+| 13 | Missing or invalid `escritorio.json` gives a warning and keeps the last valid | Automated, including the on-screen warning |
 | 14 | Hover card within 150 ms | Automated |
-| 15 | Agent call makes the NPC work in under 1 s | Automated (p95 143 ms) |
+| 15 | Agent call makes the NPC work in under 1 s | Automated (p95 142 ms) |
 | 16 | Stop celebrates; two starts and one stop still working | Automated |
 | 17 | Unknown type becomes a Freelancer, replaced when added to the team | Automated |
 | 18 | NPCs show for Claude Desktop sessions; notice when not detected | Fallback automated; the real Desktop session is the manual part (gate G4) |
-| 19 | Click opens the panel (10+ activities); Esc or click outside closes | Automated; click-outside is in the code, its test marker still has to be removed |
+| 19 | Click opens the panel (10+ activities); Esc or click outside closes | Automated |
 | 20 | Settings diff first, approval, backup, additive merge, reversible | Automated on temporary copies; applying to the real file is the manual part (gate G4) |
 | 21 | `rh-equipe` keeps `escritorio.json` in sync; welcome and farewell scenes | Scenes and `team:check` automated; the skill update is pending (outside the repository) |
 | 22 | `prefers-reduced-motion` | Automated |
@@ -38,9 +38,11 @@ Phase 1 is covered by acceptance criteria CA-01 to CA-25. The authoritative, tes
 
 Also exercised in Phase 1: CA-30 (Origin, Host, CSRF, WebSocket), CA-39 (the hook never blocks), CA-44 (project from the working folder), CA-59 (status line in the diff), CA-64 (privacy), CA-71 (permission request sends the NPC to the Director's door).
 
-## How the matrix and the code relate
+## Final result of the Phase 1 QA
 
-The QA report was written while fixes were landing. Reading the current code shows fixes for four findings it listed: the on-screen diagnostics banner (CA-13), closing the NPC panel by clicking the floor (CA-19), closing sockets after `token:rotate` on an idle office (CA-03) and the "Desktop sessions not detected" notice (CA-18). Their tests that are marked "expected failure" will turn red until the marker is removed. The end-to-end suite was not re-run when this page was written; run `npm run check` and `npm run test:e2e` for the current result.
+Of CA-01 to CA-25: **22 covered and passing** (for CA-08 only the automatable part), **3 partial with a manual remainder** (CA-18, CA-20, CA-21) and **0 without coverage**. Latest full run: `npm run check` green with 474 unit and 205 integration tests, and 83 end-to-end tests green, with no test left marked "expected failure". All bugs of the QA round are fixed.
+
+Manual items still pending: a real Claude Desktop session, applying the `settings.json` diff, the `rh-equipe` skill update, a 10-minute CPU run and a server running 8 hours. The worst-case CPU deviation (about 17 % against 10 %) is known and scheduled for Phase 4, see [Performance](performance.md).
 
 ## Related
 
