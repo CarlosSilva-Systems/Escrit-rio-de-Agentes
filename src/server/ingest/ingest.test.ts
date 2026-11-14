@@ -7,7 +7,7 @@ import { IngestService } from './service';
 
 const dir = join(import.meta.dirname, '..', '..', '..', 'tests', 'fixtures', 'hooks');
 const fixture = (name: string): unknown => JSON.parse(readFileSync(join(dir, name), 'utf8'));
-const DEV_ROOT = 'C:\\Users\\carlo\\OneDrive\\Documentos\\7 - DEV';
+const DEV_ROOT = 'D:\\fake\\7 - DEV';
 
 function setup() {
   const bus = new EventBus();

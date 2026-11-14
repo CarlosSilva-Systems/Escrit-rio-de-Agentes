@@ -1,7 +1,9 @@
 import type { OfficeEvent } from '../contracts';
 
 // Deduplication of events arriving from duplicate sources (settings + --settings hooks,
-// hooks + JSONL fallback) - ADR-0004 §2: key = (session, kind, tool_use_id | agent_id, timestamp).
+// hooks + JSONL fallback) - ADR-0004 §2: key = (session, kind, tool_use_id | agent_id).
+// A source timestamp is deliberately NOT part of the key: the JSONL fallback has none in the
+// same format, so including it would stop hook and JSONL copies from ever matching.
 // - Events with a stable id (tool use id / agent id) dedupe over a long window.
 // - Events without one dedupe only within a short sliding window (two identical hook calls).
 // Pure: the clock is injected.
@@ -20,15 +22,13 @@ export interface DedupeKey {
   stable: boolean;
 }
 
-/** `timestampHint` = a source timestamp when the payload carries one (part of the key). */
-export function dedupeKeyOf(event: OfficeEvent, timestampHint?: string | number): DedupeKey {
+export function dedupeKeyOf(event: OfficeEvent): DedupeKey {
   const stableId = event.tool?.useId ?? event.agent.agentId ?? '';
   const key = [
     event.sessionId ?? '',
     event.kind,
     stableId,
     stableId === '' ? (event.agent.agentType ?? '') : '',
-    timestampHint ?? '',
   ].join('|');
   return { key, stable: stableId !== '' };
 }
@@ -48,8 +48,8 @@ export class EventDeduper {
   }
 
   /** true when the same event was already accepted inside its window (and records it otherwise). */
-  isDuplicate(event: OfficeEvent, timestampHint?: string | number): boolean {
-    const { key, stable } = dedupeKeyOf(event, timestampHint);
+  isDuplicate(event: OfficeEvent): boolean {
+    const { key, stable } = dedupeKeyOf(event);
     const t = this.now();
     const previous = this.seen.get(key);
     if (previous && t - previous.at < previous.window) {

@@ -88,7 +88,7 @@ export class IngestService {
         this.counters.inc('ingest.ignored');
         return 'ignored';
       }
-      if (this.deduper.isDuplicate(result.event, result.timestampHint)) {
+      if (this.deduper.isDuplicate(result.event)) {
         this.counters.inc('ingest.duplicate');
         return 'duplicate';
       }

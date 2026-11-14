@@ -36,8 +36,7 @@ export interface NormalizeOptions {
 }
 
 export type NormalizeResult =
-  | { ok: true; event: OfficeEvent; timestampHint?: string | number }
-  | { ok: false; reason: 'unsupported-event' };
+  { ok: true; event: OfficeEvent } | { ok: false; reason: 'unsupported-event' };
 
 const AGENT_TYPE_RE = /^[A-Za-z0-9][A-Za-z0-9._:@/ -]{0,99}$/;
 export const UNKNOWN_AGENT_TYPE = 'unknown';
@@ -83,11 +82,6 @@ export function normalizeHookPayload(
 
   const sessionId = shortId(payload.session_id) ?? null;
   const toolName = shortId(payload.tool_name, 200);
-  const raw = payload as Record<string, unknown>;
-  const timestampHint =
-    typeof raw['timestamp'] === 'string' || typeof raw['timestamp'] === 'number'
-      ? (raw['timestamp'] as string | number)
-      : undefined;
 
   const event = options.makeEvent({
     source: 'hook',
@@ -119,5 +113,5 @@ export function normalizeHookPayload(
       ? { task: taskOf(payload.task) as { ref?: string; subject?: string } }
       : {}),
   });
-  return timestampHint === undefined ? { ok: true, event } : { ok: true, event, timestampHint };
+  return { ok: true, event };
 }
