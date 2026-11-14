@@ -1,6 +1,19 @@
+import { maskSecrets } from '../../shared/events';
 import { DEFAULT_FORMAT, detectFormat, parseSettingsText, serialize } from './format';
 import { addHooks, wrapStatusLine, type MergeChanges, type SettingsError } from './merge';
 import { unifiedDiff } from './unifiedDiff';
+
+const SENSITIVE_KEY =
+  /^(\s*"[^"]*(?:key|token|secret|pass|auth|cred|bearer)[^"]*"\s*:\s*)"(?:[^"\\]|\\.)*"/i;
+
+/**
+ * Context lines of the diff come from the user's own file and may sit next to a secret (an `env`
+ * block, for instance): values of sensitive-looking keys and token-shaped strings are masked.
+ * Added/removed lines are ours or are the very lines being changed, so they stay verbatim.
+ */
+export function maskDiffContextLine(line: string): string {
+  return maskSecrets(line.replace(SENSITIVE_KEY, '$1"***"'));
+}
 
 // `settings:diff`: proposes the new settings text and the unified diff. Changes NOTHING on disk.
 
@@ -58,6 +71,7 @@ export function proposeSettings(text: string | null, options: ProposeOptions): P
     ? unifiedDiff(before, after, {
         fromLabel: 'settings.json (atual)',
         toLabel: `settings.json (proposto, nível ${options.level})`,
+        mapContext: maskDiffContextLine,
       })
     : '';
   return { ok: true, before, after, diff, changes: merged.changes, settings: merged.settings };

@@ -49,6 +49,8 @@ export interface UnifiedDiffOptions {
   fromLabel: string;
   toLabel: string;
   context?: number;
+  /** Rewrites unchanged context lines before they are printed (secret masking, B5). */
+  mapContext?: (line: string) => string;
 }
 
 /** Unified diff, or `''` when the texts are identical (or too large to compare). */
@@ -85,7 +87,11 @@ export function unifiedDiff(before: string, after: string, options: UnifiedDiffO
     out.push(
       `@@ -${aCount === 0 ? aStart - 1 : aStart},${aCount} +${bCount === 0 ? bStart - 1 : bStart},${bCount} @@`,
     );
-    for (const op of slice) out.push(`${op.t}${op.line}`);
+    for (const op of slice) {
+      out.push(
+        `${op.t}${op.t === ' ' && options.mapContext ? options.mapContext(op.line) : op.line}`,
+      );
+    }
   }
   return `${out.join('\n')}\n`;
 }

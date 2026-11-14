@@ -247,3 +247,27 @@ describe('panel session settings (T-17, Level 0)', () => {
     );
   });
 });
+
+describe('diff context masking (B5)', () => {
+  it('CA-20: secrets sitting next to the change never appear in the printed diff', () => {
+    const { binDir } = workdir();
+    const secretKey = 'sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345';
+    const doc = {
+      env: { ANTHROPIC_API_KEY: secretKey, MY_PASSWORD: 'hunter2hunter2' },
+      statusLine: {
+        type: 'command',
+        ANTHROPIC_API_KEY: secretKey,
+        MY_PASSWORD: 'hunter2hunter2',
+        command: PIXEL_SL,
+      },
+    };
+    const r = proposeSettings(`${JSON.stringify(doc, null, 2)}\n`, { level: 2, binDir });
+    if (!r.ok) throw new Error('expected ok');
+    expect(r.diff).toContain('@@');
+    expect(r.diff).not.toContain(secretKey);
+    expect(r.diff).not.toContain('hunter2hunter2');
+    expect(r.diff).toContain('"ANTHROPIC_API_KEY": "***"');
+    // the changed line itself is shown verbatim (it is the thing being approved)
+    expect(r.diff).toContain('--wrap');
+  });
+});
