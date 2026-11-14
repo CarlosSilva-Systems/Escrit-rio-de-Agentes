@@ -86,3 +86,52 @@ describe('settings CLI (T-18)', () => {
     expect(await cmds.diff(ctx, ['--level', '9'])).toBe(2);
   });
 });
+
+describe('real settings.json needs a human at a terminal (M1)', () => {
+  // No --settings-file = the real ~/.claude/settings.json. Only refusals are exercised here: a
+  // test must never reach a successful write on the real file.
+  const flag = '--i-am-carlo-and-approved';
+
+  it('CA-20: --confirm APLICAR is ignored on the real file; without a TTY nothing is asked or written', async () => {
+    const { ctx, err } = setup();
+    let asked = false;
+    const cmds = createSettingsCommands({
+      isTTY: () => false,
+      ask: async () => {
+        asked = true;
+        return 'APLICAR';
+      },
+    });
+    expect(await cmds.apply(ctx, ['--level', '1', flag, '--confirm', 'APLICAR'])).toBe(1);
+    expect(await cmds.revert(ctx, [flag, '--confirm', 'APLICAR'])).toBe(1);
+    expect(asked).toBe(false);
+    const text = err.join('\n');
+    expect(text).toContain('terminal interativo');
+    expect(text).toContain('--confirm é ignorado');
+  });
+
+  it('CA-20: with a TTY the word must be typed; a wrong word is refused for apply and for revert', async () => {
+    const { ctx, err } = setup();
+    const asked: string[] = [];
+    const cmds = createSettingsCommands({
+      isTTY: () => true,
+      ask: async (q) => {
+        asked.push(q);
+        return 'sim';
+      },
+    });
+    expect(await cmds.apply(ctx, ['--level', '1', flag])).toBe(1);
+    expect(await cmds.revert(ctx, [flag])).toBe(1);
+    expect(asked).toHaveLength(2); // revert asks too now
+    expect(err.join('\n')).toContain('APLICAR');
+  });
+});
+
+describe('stop only kills the owner of the port (B6)', () => {
+  it('CA-83: ownsPort is true only when the listener PID equals the recorded PID', async () => {
+    const { ownsPort } = await import('../commands');
+    expect(await ownsPort(10, 3200, async () => ({ pid: 10, name: 'node.exe' }))).toBe(true);
+    expect(await ownsPort(10, 3200, async () => ({ pid: 11, name: 'other.exe' }))).toBe(false);
+    expect(await ownsPort(10, 3200, async () => null)).toBe(false);
+  });
+});

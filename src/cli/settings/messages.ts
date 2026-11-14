@@ -49,6 +49,11 @@ const ptBR: Catalog = {
   'error.event-not-array': 'O evento "{detail}" em "hooks" não é uma lista: nada foi alterado.',
   'error.statusline-unsupported':
     'A statusLine atual tem um formato que não sei envolver com segurança: nada foi alterado.',
+  'apply.tty-required':
+    'Recusado: o settings.json real só é alterado por uma pessoa digitando {word} num terminal interativo (--confirm é ignorado aqui).',
+  'revert.tty-required':
+    'Recusado: reverter o settings.json real exige digitar {word} num terminal interativo (--confirm é ignorado aqui).',
+  'apply.confirm-ignored': 'Aviso: --confirm é ignorado no settings.json real.',
   'apply.marker-missing':
     'Recusado: a pasta dos scripts precisa conter ".escritorio-equipe" no caminho (é como o revert reconhece o que é nosso).',
   'sync.copied': 'Copiado para {dir}: {files} (versão do hook: {version})',
@@ -105,6 +110,11 @@ const en: Catalog = {
   'error.event-not-array': 'Event "{detail}" under "hooks" is not a list: nothing was changed.',
   'error.statusline-unsupported':
     'The current statusLine has a shape I cannot wrap safely: nothing was changed.',
+  'apply.tty-required':
+    'Refused: the real settings.json is only changed by a person typing {word} in an interactive terminal (--confirm is ignored here).',
+  'revert.tty-required':
+    'Refused: reverting the real settings.json requires typing {word} in an interactive terminal (--confirm is ignored here).',
+  'apply.confirm-ignored': 'Note: --confirm is ignored on the real settings.json.',
   'apply.marker-missing':
     'Refused: the scripts folder path must contain ".escritorio-equipe" (that is how revert recognizes what is ours).',
   'sync.copied': 'Copied to {dir}: {files} (hook version: {version})',

@@ -30,6 +30,8 @@ export type Ask = (question: string) => Promise<string>;
 export interface SettingsCommandDeps {
   /** Reads the typed confirmation (default: stdin, only when it is a terminal). */
   ask?: Ask;
+  /** Whether stdin is an interactive terminal (default: `process.stdin.isTTY`). */
+  isTTY?: () => boolean;
 }
 
 interface Parsed {
@@ -89,6 +91,34 @@ const exists = (p: string) =>
 
 export function createSettingsCommands(deps: SettingsCommandDeps = {}) {
   const ask: Ask = deps.ask ?? defaultAsk;
+  const tty = deps.isTTY ?? (() => Boolean(process.stdin.isTTY));
+
+  /**
+   * Confirmation of a write. On the REAL settings.json (M1) `--confirm` is ignored: only a person
+   * typing the word in an interactive terminal counts, so a script or agent cannot approve it.
+   * Returns null (after printing why) when it cannot be asked.
+   */
+  const confirmation = async (
+    ctx: CliContext,
+    real: boolean,
+    typed: string | undefined,
+    ttyKey: string,
+  ): Promise<string | null> => {
+    if (real) {
+      if (typed !== undefined) ctx.err(msg(ctx.lang, 'apply.confirm-ignored'));
+      if (!tty()) {
+        ctx.err(msg(ctx.lang, ttyKey, { word: CONFIRM_WORD }));
+        return null;
+      }
+      return ask(msg(ctx.lang, 'apply.prompt', { word: CONFIRM_WORD }));
+    }
+    if (typed !== undefined) return typed;
+    if (!tty() && deps.ask === undefined) {
+      ctx.err(msg(ctx.lang, 'apply.confirm-required', { word: CONFIRM_WORD }));
+      return null;
+    }
+    return ask(msg(ctx.lang, 'apply.prompt', { word: CONFIRM_WORD }));
+  };
 
   const diff = async (ctx: CliContext, args: string[]): Promise<number> => {
     const parsed = parse(args);
@@ -161,14 +191,13 @@ export function createSettingsCommands(deps: SettingsCommandDeps = {}) {
       ctx.err(msg(ctx.lang, 'apply.real-refused'));
       return 1;
     }
-    let confirm = parsed.values.get('--confirm');
-    if (confirm === undefined) {
-      if (!process.stdin.isTTY && deps.ask === undefined) {
-        ctx.err(msg(ctx.lang, 'apply.confirm-required', { word: CONFIRM_WORD }));
-        return 1;
-      }
-      confirm = await ask(msg(ctx.lang, 'apply.prompt', { word: CONFIRM_WORD }));
-    }
+    const confirm = await confirmation(
+      ctx,
+      isRealUserSettings(file),
+      parsed.values.get('--confirm'),
+      'apply.tty-required',
+    );
+    if (confirm === null) return 1;
 
     const config = new ConfigStore(ctx.env.paths);
     await config.load();
@@ -214,6 +243,23 @@ export function createSettingsCommands(deps: SettingsCommandDeps = {}) {
     if (parsed.bad !== null)
       return usageError(ctx, ctx.lang, 'usage.unknown-option', { option: parsed.bad });
     const file = settingsFile(parsed);
+    if (isRealUserSettings(file)) {
+      if (!parsed.flags.has(REAL_PATH_FLAG)) {
+        ctx.err(msg(ctx.lang, 'revert.real-refused'));
+        return 1;
+      }
+      const typed = await confirmation(
+        ctx,
+        true,
+        parsed.values.get('--confirm'),
+        'revert.tty-required',
+      );
+      if (typed === null) return 1;
+      if (typed !== CONFIRM_WORD) {
+        ctx.err(msg(ctx.lang, 'apply.confirm-required', { word: CONFIRM_WORD }));
+        return 1;
+      }
+    }
     const result = await revertSettings({
       settingsPath: file,
       allowRealPath: parsed.flags.has(REAL_PATH_FLAG),
