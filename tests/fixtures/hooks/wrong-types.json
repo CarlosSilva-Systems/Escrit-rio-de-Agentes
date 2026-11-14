@@ -1,0 +1,8 @@
+{
+  "hook_event_name": "Stop",
+  "session_id": 12345,
+  "agent_type": [
+    "x"
+  ],
+  "cwd": null
+}

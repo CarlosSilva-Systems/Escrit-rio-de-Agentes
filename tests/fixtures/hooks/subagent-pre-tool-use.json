@@ -1,0 +1,13 @@
+{
+  "hook_event_name": "PreToolUse",
+  "session_id": "3f1c2f9e-8a7b-4c1d-9b6e-2a5d7c8e9f10",
+  "cwd": "C:\\Users\\carlo\\OneDrive\\Documentos\\7 - DEV\\Sites",
+  "agent_id": "a1b2c3d4e5f6",
+  "agent_type": "dev-web",
+  "tool_name": "Edit",
+  "tool_use_id": "toolu_01SUB",
+  "tool_input": {
+    "file_path": "x",
+    "new_string": "CANARY-TOOL-INPUT"
+  }
+}

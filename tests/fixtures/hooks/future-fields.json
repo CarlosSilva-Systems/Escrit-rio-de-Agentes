@@ -1,0 +1,12 @@
+{
+  "hook_event_name": "Notification",
+  "notification_type": "idle_prompt",
+  "brand_new_field": {
+    "nested": [
+      1,
+      2,
+      3
+    ]
+  },
+  "session_id": "s1"
+}

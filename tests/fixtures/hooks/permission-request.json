@@ -1,0 +1,10 @@
+{
+  "hook_event_name": "PermissionRequest",
+  "session_id": "3f1c2f9e-8a7b-4c1d-9b6e-2a5d7c8e9f10",
+  "cwd": "C:\\dev\\Sites",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "C:\\dev\\Sites\\a.txt",
+    "content": "hello"
+  }
+}

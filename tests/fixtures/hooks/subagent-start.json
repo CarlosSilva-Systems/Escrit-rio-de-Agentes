@@ -1,0 +1,9 @@
+{
+  "hook_event_name": "SubagentStart",
+  "session_id": "3f1c2f9e-8a7b-4c1d-9b6e-2a5d7c8e9f10",
+  "transcript_path": "C:\\Users\\someone\\.claude\\projects\\x\\3f1c2f9e.jsonl",
+  "cwd": "C:\\dev\\Sites",
+  "agent_id": "agent-abc123",
+  "agent_type": "dev-web",
+  "permission_mode": "default"
+}
