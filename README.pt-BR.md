@@ -17,7 +17,7 @@ O que já funciona:
 - Agentes chamados pelo Claude Code começam a trabalhar em cerca de 140 ms (hooks) ou 1–2 s (leitura dos arquivos de sessão). Tipos de agente desconhecidos viram "Freelancers" visitantes temporários.
 - Cartão ao passar o mouse, painel ao clicar com a atividade recente, gaveta da Equipe, minimapa, zoom, arrastar e "seguir este NPC".
 - Interface em português (padrão) e inglês, trocável sem recarregar; atalhos de teclado; respeita `prefers-reduced-motion`.
-- Acesso seguro (ticket de uso único, cookie de sessão, CSRF) e a linha de comando `escritorio` (`open`, `start`, `stop`, `status`, `token:rotate`, `settings:*`, `hooks:sync`, `team:*`).
+- Acesso seguro (ticket de uso único, cookie de sessão, CSRF), com Configurações → Sair e a linha de comando `escritorio` (`open`, `start`, `stop`, `status`, `token:rotate`, `settings:*`, `hooks:sync`, `team:*`).
 - Um instalador dos hooks do Claude Code que você pode revisar e desfazer (`settings:diff` / `settings:apply` / `settings:revert`). **Nada foi aplicado ao seu `settings.json`.**
 
 O que **ainda não** funciona (os painéis C, T, A e M abrem um aviso "esta área chega nas próximas etapas"):

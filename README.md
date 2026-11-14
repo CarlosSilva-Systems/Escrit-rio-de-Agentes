@@ -17,7 +17,7 @@ What already works:
 - Agents called by Claude Code start working in about 140 ms (hooks) or 1–2 s (reading the session files). Unknown agent types appear as temporary "visitor" Freelancers.
 - Hover card, click panel with recent activity, team drawer, minimap, zoom, pan and "follow this NPC".
 - Portuguese (default) and English interface, switchable without reloading; keyboard shortcuts; respects `prefers-reduced-motion`.
-- Secure access (one-time ticket, session cookie, CSRF) and the `escritorio` command line (`open`, `start`, `stop`, `status`, `token:rotate`, `settings:*`, `hooks:sync`, `team:*`).
+- Secure access (one-time ticket, session cookie, CSRF), with Settings → Sign out and the `escritorio` command line (`open`, `start`, `stop`, `status`, `token:rotate`, `settings:*`, `hooks:sync`, `team:*`).
 - A reviewable, reversible installer for the Claude Code hooks (`settings:diff` / `settings:apply` / `settings:revert`). **Nothing has been applied to your `settings.json`.**
 
 What does **not** work yet (the C, T, A and M panels open a "coming in the next stages" placeholder):
