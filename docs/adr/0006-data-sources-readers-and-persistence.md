@@ -29,7 +29,7 @@
 | `~/.escritorio-equipe/bin/` | installer | `escritorio-hook.cjs`, `escritorio-statusline.cjs` |
 | `~/.escritorio-equipe/claude-settings.json` | server | file passed via `--settings` (ADR-0004) |
 
-All writes: write temp file in the same folder → `rename` (retry 3× on `EPERM/EBUSY`, Windows) — debounced (≥ 1 s) for `state.json`. Readers retry once on parse error (partial write) and keep the last good value.
+All writes: write temp file in the same folder → `rename` (retry up to 10× with growing delay on `EPERM/EBUSY/EACCES`, Windows; single implementation in `src/server/home/fsAtomic.ts`) — debounced (≥ 1 s) for `state.json`. Readers retry once on parse error (partial write) and keep the last good value.
 History title: the first prompt is reduced to its first 80 characters for the history list (CA-36). This is the only conversation-derived text persisted; can be disabled (`history.storeTitles=false`). → **Carlos decides** (privacy vs. usability; default on, masked).
 
 ### PLANO.md reader (tasks — primary source)
