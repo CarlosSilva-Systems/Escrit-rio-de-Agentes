@@ -1,8 +1,8 @@
 # ADR-0002: Rendering — custom Canvas 2D engine (PixiJS as measured fallback, Phaser rejected)
 
-> **Resumo (pt-BR):** Recomendo **Canvas 2D próprio**, sem dependência, renderizando o mundo em resolução nativa (1×, 960×640 px) num canvas fora da tela, com iluminação por camada de multiplicação, e ampliando por zoom inteiro com `imageSmoothingEnabled=false`. Phaser fica descartado (pesado e duplica o que o React faz). O **spike S-02** compara Canvas 2D × PixiJS 8 com critérios medíveis; o Canvas 2D foi **aceito com um desvio registrado**: no pior caso a CPU medida foi 15,7% contra a meta de 10%; otimiza-se na fase 4 e o PixiJS (novo ADR) só entra se ainda passar da meta.
+> **Resumo (pt-BR):** Recomendo **Canvas 2D próprio**, sem dependência, renderizando o mundo em resolução nativa (1×, 960×640 px) num canvas fora da tela, com iluminação por camada de multiplicação, e ampliando por zoom inteiro com `imageSmoothingEnabled=false`. Phaser fica descartado (pesado e duplica o que o React faz). O **spike S-02** compara Canvas 2D × PixiJS 8 com critérios medíveis; o Canvas 2D foi **aceito com um desvio registrado**: no pior caso a CPU medida variou entre 14,5% e 17,3% de um núcleo conforme a carga da máquina (spike, 14,5%; QA final, 17,3%), contra a meta de 10%; otimiza-se na fase 4 e o PixiJS (novo ADR) só entra se ainda passar da meta.
 
-- Status: Accepted with a recorded deviation (worst-case CPU 15.7% vs 10% target; optimize in phase 4, PixiJS only if still over)
+- Status: Accepted with a recorded deviation (worst-case CPU measured between 14.5% and 17.3% of one core depending on machine load, vs a 10% target; optimize in phase 4, PixiJS only if still over)
 - Date: 2026-11-12
 - Deciders: Artur (architect), Lívia (dev-web) for the spike; approval: Carlos
 
