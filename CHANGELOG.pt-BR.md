@@ -28,6 +28,8 @@ atividade e os diagnósticos.
   desenvolvedor ativada com `?debug`.
 - Fontes pixel empacotadas sob OFL (Pixelify Sans e Silkscreen), com os textos de licença e os
   créditos.
+- Documentação bilíngue: README principal, índice da documentação, tutorial de primeiro uso,
+  guias de como fazer, páginas de referência, páginas de explicação e o índice dos ADRs.
 - Ingestão de hooks, fallback pelas transcrições JSONL, registro da equipe com validação e os
   comandos `team:check` e `team:init`.
 - Comando `escritorio` para o ciclo de vida do servidor (`start`, `open`, `stop`, `status`,

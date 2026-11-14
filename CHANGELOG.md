@@ -25,6 +25,8 @@ office on `127.0.0.1`, with the team roster, live NPC states, activity, and diag
 - Diagnostic notices with stable codes translated in the interface, and a developer overlay
   enabled with `?debug`.
 - Bundled OFL pixel fonts (Pixelify Sans and Silkscreen) with their licence texts and credits.
+- Bilingual documentation: root README, documentation index, first-use tutorial, how-to guides,
+  reference pages, explanation pages, and the ADR index.
 - Hook ingest, JSONL transcript fallback, team registry with validation, and the
   `team:check` and `team:init` commands.
 - `escritorio` command for the server lifecycle (`start`, `open`, `stop`, `status`,
