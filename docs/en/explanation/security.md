@@ -57,7 +57,7 @@ A random program could start listening on port 3200 before the Office and wait f
 
 ## Rotate and revoke
 
-[Rotate the token](../how-to/rotate-token.md) to invalidate everything at once. See also [Log out](../how-to/log-out.md).
+Use **Settings → Sign out** for this browser, or [rotate the token](../how-to/rotate-token.md) to invalidate everything at once. See also [Log out](../how-to/log-out.md).
 
 ## Related
 
