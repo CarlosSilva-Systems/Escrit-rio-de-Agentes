@@ -1,0 +1,131 @@
+/* Escritório da Equipe — design tokens (v1, 2026-11-12, Bianca)
+ * Fonte da verdade dos valores: GUIA-VISUAL.md. Contrastes WCAG calculados lá.
+ * Uso: importar uma vez na raiz; componentes só consomem var(--...).
+ */
+:root {
+  /* ---------- HUD (tema escuro quente) ---------- */
+  --bg-900: #1F1A17;   /* fundo da página/HUD base */
+  --bg-800: #2A2320;   /* painéis, gavetas, barra superior */
+  --bg-700: #3A312C;   /* cartões, campos, itens elevados */
+  --bg-track: #120F0D; /* trilho de barras, sombras duras */
+  --border-soft: #5A4A40;   /* separadores decorativos (sem função de informação) */
+  --border-strong: #94806E; /* contorno de controles (>= 3:1 em bg-900/800/700) */
+
+  --text-1: #F6EBDD;   /* texto principal */
+  --text-2: #D4C3B0;   /* texto secundário */
+  --text-3: #B5A18C;   /* texto terciário (min 4.5:1 em bg-700) */
+  --text-disabled: #8A7766; /* desabilitado (isento de contraste; 3.6:1 em bg-800) */
+  --ink: #1F1A17;      /* texto sobre fundos claros/coloridos */
+
+  --teal-300: #5FC9B8; /* verde-água: ação primária, links, foco secundário */
+  --terra-300: #E8896A; /* terracota: destaque, avisos suaves */
+  --focus: #FFD84D;    /* anel de foco (12.5:1 em bg-900) */
+
+  /* ---------- Estado / medidor ---------- */
+  --meter-green: #5FCB6E;   /* 0–60 % */
+  --meter-yellow: #F2C94C;  /* >60–85 % */
+  --meter-red: #F2685A;     /* >85 % (preenchimento) */
+  --danger-text: #F77B6B;   /* texto vermelho (4.8:1 em bg-700) */
+
+  /* ---------- Departamentos ----------
+   * --dept-X-light : texto/ícone/crachá no HUD escuro (crachá usa --ink como texto)
+   * --dept-X-base  : tapete, placa de porta, arte do mapa
+   * --dept-X-on    : cor do texto sobre --dept-X-base
+   */
+  --dept-diretoria-light: #EDBE45;  --dept-diretoria-base: #C9962A;  --dept-diretoria-on: #1F1A17;
+  --dept-planejamento-light: #BCA3EE; --dept-planejamento-base: #9A7DD6; --dept-planejamento-on: #1F1A17;
+  --dept-engenharia-light: #78B0F5; --dept-engenharia-base: #5B94E0; --dept-engenharia-on: #1F1A17;
+  --dept-qualidade-light: #6FCF7C;  --dept-qualidade-base: #3E9B55;  --dept-qualidade-on: #1F1A17;
+  --dept-entrega-light: #F59F45;    --dept-entrega-base: #E0792B;    --dept-entrega-on: #1F1A17;
+  --dept-biblioteca-light: #E58AA5; --dept-biblioteca-base: #8E2F4B; --dept-biblioteca-on: #F6EBDD;
+
+  /* ---------- Arte do mapa (referência; a arte final vive nos sprites) ---------- */
+  --art-floor-honey: #D9A566;
+  --art-floor-honey-dark: #C98F52;
+  --art-floor-honey-light: #E8BB80;
+  --art-wall-cream: #F3E6CC;
+  --art-wall-cream-shade: #E2D0AE;
+  --art-wall-trim: #B98C5A;
+  --art-teal: #4FB3A5;
+  --art-teal-deep: #2E7F76;
+  --art-terracotta: #C8643F;
+  --art-terracotta-light: #E08A5F;
+  --art-leaf: #4E9A4F;
+  --art-leaf-deep: #2F6B3A;
+  --art-outline: #3B2A20;
+  --art-soc-floor: #26323F;
+  --art-soc-screen: #4FE38B;
+  --art-soc-blue: #4A7BD0;
+
+  /* ---------- Ciclo dia/noite (sobreposição sobre o mapa; nunca sobre o HUD) ---------- */
+  --tint-dawn: rgba(255, 181, 138, 0.18);   /* 05:30–07:59 */
+  --tint-day: rgba(255, 255, 255, 0);       /* 08:00–16:59 */
+  --tint-dusk: rgba(255, 138, 91, 0.22);    /* 17:00–18:59 */
+  --tint-night: rgba(30, 42, 94, 0.42);     /* 19:00–05:29 */
+  --sky-dawn: #FFD8B0; --sky-day: #BFE3F5; --sky-dusk: #FFA36B; --sky-night: #1B2748;
+  --lamp-glow: rgba(255, 217, 160, 0.55);
+
+  /* ---------- Espaçamento (múltiplos de 4 px) ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+
+  /* ---------- Raios (estilo pixel: quinas retas ou chanfro de 4 px) ---------- */
+  --radius-0: 0;
+  --radius-1: 4px;
+  --radius-2: 8px;
+
+  /* ---------- Sombras pixel (duras, sem blur) ---------- */
+  --shadow-1: 0 2px 0 0 var(--bg-track);
+  --shadow-2: 0 4px 0 0 var(--bg-track);
+  --shadow-3: 0 4px 0 0 var(--bg-track), 0 8px 0 0 rgba(18, 15, 13, 0.5);
+  --outline-1: 0 0 0 2px var(--border-strong);
+  --focus-ring: 0 0 0 2px var(--bg-900), 0 0 0 4px var(--focus); /* duplo: funciona sobre qualquer fundo */
+
+  /* ---------- Z-index ---------- */
+  --z-map: 0;
+  --z-map-overlay: 10;   /* balões, ícones de status, tooltip do NPC */
+  --z-minimap: 20;
+  --z-bottom-panel: 30;
+  --z-drawer: 40;
+  --z-topbar: 50;
+  --z-popover: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+
+  /* ---------- Tipografia ---------- */
+  --font-ui: "Pixelify Sans", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-sign: "Silkscreen", "Pixelify Sans", ui-monospace, monospace;
+  --font-mono: "Cascadia Mono", Consolas, "Courier New", monospace; /* terminal e código */
+  --fs-sm: 14px;  --lh-sm: 20px;   /* mínimo absoluto para texto de interface */
+  --fs-md: 16px;  --lh-md: 24px;   /* corpo padrão */
+  --fs-lg: 20px;  --lh-lg: 28px;
+  --fs-xl: 24px;  --lh-xl: 32px;
+  --fs-2xl: 32px; --lh-2xl: 40px;
+  --fs-sign-sm: 16px; /* Silkscreen: só múltiplos de 8 px */
+  --fs-sign-md: 24px;
+  --fs-sign-lg: 32px;
+
+  /* ---------- Movimento ---------- */
+  --dur-fast: 120ms;
+  --dur-base: 160ms;
+  --dur-slow: 240ms;
+  --ease-pixel: steps(4, end);
+}
+
+/* Redução de movimento: remove deslizes, piscadas e máquina de escrever. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --ease-pixel: linear; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Pixel art nítida (sem desfoque) */
+.pixelated, canvas.office { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* Foco visível padrão */
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
