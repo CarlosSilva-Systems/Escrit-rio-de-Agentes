@@ -44,12 +44,15 @@ export interface OfficeStateDeps {
 
 export type StateChange =
   | { type: 'npc'; npc: NpcLogical }
+  | { type: 'npc.remove'; key: string }
   | { type: 'activity'; item: ActivityItem }
   | { type: 'project'; project: ProjectSummary };
 
 export const INSTANCE_TTL_MS = 15 * 60_000;
 export const AWAITING_TTL_MS = 10 * 60_000;
 export const FREELANCER_LINGER_MS = 5000;
+/** Ceiling of simultaneous freelancer NPCs (OBS-02): beyond it their events are dropped (counted). */
+export const MAX_FREELANCERS = 12;
 export const ACTIVITY_RING = 500;
 export const NPC_HISTORY_RING = 50;
 export const SNAPSHOT_ACTIVITY = 200;
@@ -116,7 +119,13 @@ export class OfficeState {
   /** NPC keys whose instances changed since the last refresh. */
   private dirty = new Set<string>();
   /** Diagnostic counters owned by the state (merged into /api/diag). */
-  readonly counters = { orphanStops: 0, expiredInstances: 0, expiredAwaiting: 0, events: 0 };
+  readonly counters = {
+    orphanStops: 0,
+    expiredInstances: 0,
+    expiredAwaiting: 0,
+    events: 0,
+    droppedFreelancers: 0,
+  };
 
   constructor(private readonly deps: OfficeStateDeps) {
     this.now = deps.now ?? (() => Date.now());
@@ -138,6 +147,14 @@ export class OfficeState {
       agentType: event.agent.agentType,
       agentId: event.agent.agentId,
     });
+    if (
+      resolved.kind === 'freelancer' &&
+      !this.npcs.has(resolved.key) &&
+      this.freelancerCount() >= MAX_FREELANCERS
+    ) {
+      this.counters.droppedFreelancers++; // too many unknown agents at once: ignore this event
+      return;
+    }
     this.ensureNpc(resolved, now);
     this.dirty.add(resolved.key);
     if (event.sessionId) this.touchSession(event.sessionId, ts);
@@ -232,8 +249,13 @@ export class OfficeState {
     const inView = new Set(this.deps.team.view.agents.map((a) => a.agentType));
     for (const npc of [...this.npcs.values()]) {
       if (npc.kind === 'fixed' && !inView.has(npc.key) && this.countOf(npc.key) === 0) {
-        this.npcs.delete(npc.key); // left the team and idle: gone
-        this.history.delete(npc.key);
+        this.dropNpc(npc.key); // left the team and idle: gone
+      } else if (
+        npc.kind === 'freelancer' &&
+        inView.has(npc.agentType) &&
+        this.countOf(npc.key) === 0
+      ) {
+        this.dropNpc(npc.key); // promoted: its work moved to the fixed NPC
       }
     }
     for (const key of this.npcs.keys()) this.dirty.add(key);
@@ -272,8 +294,7 @@ export class OfficeState {
         npc.expiresAt <= now &&
         this.countOf(npc.key) === 0
       ) {
-        this.npcs.delete(npc.key);
-        this.history.delete(npc.key);
+        this.dropNpc(npc.key);
       }
     }
     this.flushDirty(now);
@@ -392,6 +413,20 @@ export class OfficeState {
     };
     this.npcs.set(rec.key, rec);
     return rec;
+  }
+
+  /** Removes an NPC from the state and tells subscribers (WS `npc.remove`). */
+  private dropNpc(key: string): void {
+    if (!this.npcs.delete(key)) return;
+    this.history.delete(key);
+    this.dirty.delete(key);
+    this.emit({ type: 'npc.remove', key });
+  }
+
+  private freelancerCount(): number {
+    let n = 0;
+    for (const npc of this.npcs.values()) if (npc.kind === 'freelancer') n++;
+    return n;
   }
 
   private countOf(key: string): number {

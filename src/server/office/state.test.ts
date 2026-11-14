@@ -228,3 +228,43 @@ describe('OfficeState feed and snapshot (T-21)', () => {
     expect(state.snapshot().npcs.map((n) => n.key)).toEqual(['chefe', 'dev-web', 'dev-backend']);
   });
 });
+
+describe('OfficeState removal events (Rita 1)', () => {
+  it('CA-17: an expired freelancer leaves the snapshot and emits npc.remove', () => {
+    const { state, send, advance, changes } = setup();
+    send(start('zz9', 'mystery-agent'));
+    send(stop('zz9', 'mystery-agent'));
+    advance(6000);
+    state.sweep();
+    expect(state.snapshot().npcs.some((n) => n.key === 'freelancer:zz9')).toBe(false);
+    expect(changes).toContainEqual({ type: 'npc.remove', key: 'freelancer:zz9' });
+  });
+
+  it('CA-17: a promoted freelancer is removed at once and the fixed NPC takes over', () => {
+    const { state, send, setView, changes } = setup();
+    send(start('zz9', 'dev-data'));
+    setView(
+      buildFallbackView([
+        { agentType: 'chefe', nickname: 'Chefe', phase: 'Todas', role: '' },
+        { agentType: 'dev-data', nickname: 'Dora', phase: 'Construir', role: '' },
+      ]),
+    );
+    expect(changes).toContainEqual({ type: 'npc.remove', key: 'freelancer:zz9' });
+    expect(state.hasNpc('freelancer:zz9')).toBe(false);
+    // dev-web and dev-backend left the team while idle: removed too
+    expect(changes).toContainEqual({ type: 'npc.remove', key: 'dev-web' });
+  });
+});
+
+describe('freelancer ceiling (OBS-02)', () => {
+  it('CA-17: at most 12 freelancers at once; the excess is dropped and counted', () => {
+    const { state, send } = setup();
+    for (let i = 0; i < 20; i++) send(start(`x${i}`, `unknown-type-${i}`));
+    const freelancers = state.snapshot().npcs.filter((n) => n.kind === 'freelancer');
+    expect(freelancers).toHaveLength(12);
+    expect(state.counters.droppedFreelancers).toBe(8);
+    // a known freelancer keeps working normally
+    send(stop('x0', 'unknown-type-0'));
+    expect(state.npc('freelancer:x0')?.activeCount).toBe(0);
+  });
+});

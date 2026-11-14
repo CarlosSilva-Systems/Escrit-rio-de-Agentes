@@ -122,3 +122,15 @@ describe('WebSocket contract', () => {
     ).toBe(false);
   });
 });
+
+describe('npc.remove (Rita 1)', () => {
+  it('CA-17: npc.remove is a strict server message', () => {
+    expect(ServerMessageSchema.safeParse({ t: 'npc.remove', key: 'freelancer:x' }).success).toBe(
+      true,
+    );
+    expect(ServerMessageSchema.safeParse({ t: 'npc.remove', key: '' }).success).toBe(false);
+    expect(ServerMessageSchema.safeParse({ t: 'npc.remove', key: 'a', extra: 1 }).success).toBe(
+      false,
+    );
+  });
+});

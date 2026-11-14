@@ -55,6 +55,7 @@ const DIAG_CACHE_MS = 10_000;
 
 class Publisher {
   private npcs = new Map<string, NpcLogical>();
+  private removed = new Set<string>();
   private activity: ActivityItem[] = [];
   private projects = new Map<string, ProjectSummary>();
   private timer: NodeJS.Timeout | null = null;
@@ -65,8 +66,13 @@ class Publisher {
   ) {}
 
   push(change: StateChange): void {
-    if (change.type === 'npc') this.npcs.set(change.npc.key, change.npc);
-    else if (change.type === 'activity') this.activity.push(change.item);
+    if (change.type === 'npc') {
+      this.npcs.set(change.npc.key, change.npc);
+      this.removed.delete(change.npc.key);
+    } else if (change.type === 'npc.remove') {
+      this.npcs.delete(change.key); // an update queued before the removal is moot
+      this.removed.add(change.key);
+    } else if (change.type === 'activity') this.activity.push(change.item);
     else this.projects.set(change.project.name, change.project);
     this.timer ??= setTimeout(() => this.flush(), this.delayMs);
     this.timer.unref();
@@ -76,12 +82,15 @@ class Publisher {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
     const npcs = [...this.npcs.values()];
+    const removed = [...this.removed];
+    this.removed = new Set();
     const activity = this.activity;
     const projects = [...this.projects.values()];
     this.npcs = new Map();
     this.activity = [];
     this.projects = new Map();
     for (const npc of npcs) this.send({ t: 'npc.update', npc });
+    for (const key of removed) this.send({ t: 'npc.remove', key });
     for (const item of activity) this.send({ t: 'activity', item });
     for (const project of projects) this.send({ t: 'project.upsert', project });
   }
@@ -198,7 +207,7 @@ export class OfficeService {
   }
 
   async stop(): Promise<void> {
-    this.jsonl?.stop();
+    await this.jsonl?.stop();
     this.team.stop();
     if (this.sweepTimer) clearInterval(this.sweepTimer);
     this.sweepTimer = null;
@@ -215,9 +224,19 @@ export class OfficeService {
     const out: Diagnostic[] = [];
     if (this.jsonl && !this.jsonl.stats().watching) {
       out.push({
+        code: 'jsonl.watcher-inactive',
         file: 'projects',
         message: 'JSONL fallback watcher is not active (folder missing or unreadable)',
         severity: 'info',
+      });
+    }
+    if (this.stateRef && this.stateRef.counters.droppedFreelancers > 0) {
+      out.push({
+        code: 'office.freelancer-limit',
+        params: { dropped: String(this.stateRef.counters.droppedFreelancers) },
+        file: 'office',
+        message: `Freelancer limit reached: ${this.stateRef.counters.droppedFreelancers} event(s) from unknown agents were dropped`,
+        severity: 'warning',
       });
     }
     return out;
@@ -249,6 +268,7 @@ export class OfficeService {
       'office.orphanStops': this.state.counters.orphanStops,
       'office.expiredInstances': this.state.counters.expiredInstances,
       'office.expiredAwaiting': this.state.counters.expiredAwaiting,
+      'office.droppedFreelancers': this.state.counters.droppedFreelancers,
       'office.liveInstances': this.state.liveInstanceCount(),
       'office.activeSessions': this.state.activeSessionCount(),
       'settings.level': this.diagCache.settingsLevel,

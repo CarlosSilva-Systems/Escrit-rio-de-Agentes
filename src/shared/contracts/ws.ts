@@ -50,6 +50,8 @@ export const ServerMessageSchema = z.discriminatedUnion('t', [
   }),
   z.object({ t: z.literal('snapshot'), snapshot: OfficeSnapshotSchema }),
   z.object({ t: z.literal('npc.update'), npc: NpcLogicalSchema }),
+  /** An NPC left the state (expired/promoted freelancer, agent removed from the team). */
+  z.strictObject({ t: z.literal('npc.remove'), key: z.string().min(1).max(160) }),
   z.object({ t: z.literal('activity'), item: ActivityItemSchema }),
   z.object({ t: z.literal('approval.upsert'), approval: ApprovalCardSchema }),
   z.object({ t: z.literal('approval.remove'), id: z.string().min(1).max(64) }),
