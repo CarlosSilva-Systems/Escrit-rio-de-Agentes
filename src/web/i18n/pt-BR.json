@@ -151,5 +151,10 @@
   "diag.code.quadro.agent-duplicate": "Agente repetido em {arquivo}: {agentType}.",
   "diag.code.quadro.too-many": "Agentes demais em {arquivo}.",
   "diag.code.map.unreadable": "Não consegui ler o mapa ({arquivo}).",
-  "diag.code.office.freelancer-limit": "Limite de Freelancers atingido: {dropped} evento(s) de agentes desconhecidos descartados."
+  "diag.code.office.freelancer-limit": "Limite de Freelancers atingido: {dropped} evento(s) de agentes desconhecidos descartados.",
+  "top.logout": "Sair",
+  "logout.title": "Sair do escritório?",
+  "logout.body": "Para voltar você vai precisar abrir o escritório de novo pelo atalho. As sessões do Claude Code não são afetadas.",
+  "logout.confirm": "Sair",
+  "common.cancel": "Cancelar"
 }

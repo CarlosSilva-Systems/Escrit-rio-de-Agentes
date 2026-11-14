@@ -58,7 +58,7 @@ class FakeWebSocket {
   sent: string[] = [];
   onopen: (() => void) | null = null;
   onmessage: ((e: { data: unknown }) => void) | null = null;
-  onclose: (() => void) | null = null;
+  onclose: ((e?: { code?: number }) => void) | null = null;
   onerror: (() => void) | null = null;
   constructor(readonly url: string) {
     FakeWebSocket.instances.push(this);
@@ -77,9 +77,9 @@ class FakeWebSocket {
   serverSend(data: unknown) {
     this.onmessage?.({ data: typeof data === 'string' ? data : JSON.stringify(data) });
   }
-  serverDrop() {
+  serverDrop(code?: number) {
     this.readyState = 3;
-    this.onclose?.();
+    this.onclose?.(code === undefined ? undefined : { code });
   }
 }
 
@@ -255,6 +255,7 @@ describe('connection manager', () => {
         patchConfig: async () => undefined,
         getNpcHistory: async () => [],
         getDiag: async () => ({}),
+        logout: async () => undefined,
       },
     });
     conn.start();
@@ -322,6 +323,7 @@ describe('connection manager', () => {
         patchConfig: async () => undefined,
         getNpcHistory: async () => [],
         getDiag: async () => ({}),
+        logout: async () => undefined,
       },
     });
     conn.start();
@@ -347,6 +349,7 @@ describe('connection manager', () => {
         getSession: async () => sessionOk,
         getNpcHistory: async () => [],
         getDiag: async () => ({}),
+        logout: async () => undefined,
         patchConfig: async (p) => {
           patches.push(p);
           throw new Error('server down'); // must not surface
@@ -375,5 +378,134 @@ describe('reducer through the socket', () => {
     for (const m of msgs) s = applyServerMessage(s, m);
     expect(s.roomSlots[0]).toBe('A');
     expect(s.snapshot).not.toBeNull();
+  });
+});
+
+describe('sign out (logout)', () => {
+  const ok = (body: unknown = {}) =>
+    new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+
+  it('CA-03: logout POSTs /api/auth/logout with the CSRF header and forgets the token', async () => {
+    const calls: { path: string; init?: RequestInit }[] = [];
+    const api = createApi(async (path, init) => {
+      calls.push({ path, init });
+      if (path === '/api/session') return ok({ csrfToken: 'c'.repeat(32), lang: 'pt-BR' });
+      return new Response(null, { status: 204 });
+    });
+    await api.getSession();
+    await api.logout();
+    expect(calls[1]?.path).toBe('/api/auth/logout');
+    expect(calls[1]?.init?.method).toBe('POST');
+    expect((calls[1]?.init?.headers as Record<string, string>)['content-type']).toBeUndefined(); // no body
+    expect((calls[1]?.init?.headers as Record<string, string>)['X-Escritorio-CSRF']).toBe(
+      'c'.repeat(32),
+    );
+    // The token is gone: another action is refused before reaching the network.
+    await expect(api.patchConfig({ sound: true })).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it('CA-03: a 4401 close from the server shows the access screen and never reconnects', async () => {
+    FakeWebSocket.instances = [];
+    const timers = new FakeTimers();
+    const store = createStore<AppState>(initialState());
+    createConnection({
+      store,
+      timers,
+      WebSocketImpl: WS,
+      wsUrl: 'ws://x/ws',
+      api: {
+        getSession: async () => ({ csrfToken: 'c'.repeat(32), lang: 'pt-BR' as const }),
+        patchConfig: async () => undefined,
+        getNpcHistory: async () => [],
+        getDiag: async () => ({}),
+        logout: async () => undefined,
+      },
+    }).start();
+    await flush();
+    const ws = FakeWebSocket.instances[0] as FakeWebSocket;
+    ws.serverOpen();
+    ws.serverSend({ t: 'snapshot', snapshot: makeSnapshot() });
+    expect(store.getState().snapshot).not.toBeNull();
+    ws.serverDrop(4401);
+    expect(store.getState().connection).toBe('unauthorized');
+    expect(store.getState().snapshot).toBeNull();
+    await timers.advance(120_000);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it('CA-03: logout clears the office from memory, closes the socket, shows the access screen, and "try again" does not loop', async () => {
+    FakeWebSocket.instances = [];
+    const timers = new FakeTimers();
+    const store = createStore<AppState>(initialState());
+    let sessionCalls = 0;
+    let loggedOut = false;
+    const conn = createConnection({
+      store,
+      timers,
+      WebSocketImpl: WS,
+      wsUrl: 'ws://x/ws',
+      api: {
+        getSession: async () => {
+          sessionCalls++;
+          if (loggedOut) throw new ApiError(401, 'unauthorized');
+          return { csrfToken: 'c'.repeat(32), lang: 'pt-BR' as const };
+        },
+        patchConfig: async () => undefined,
+        getNpcHistory: async () => [],
+        getDiag: async () => ({}),
+        logout: async () => {
+          loggedOut = true;
+        },
+      },
+    });
+    conn.start();
+    await flush();
+    const ws = FakeWebSocket.instances[0] as FakeWebSocket;
+    ws.serverOpen();
+    ws.serverSend({ t: 'snapshot', snapshot: makeSnapshot() });
+    store.setState((s) => ({ ui: { ...s.ui, selectedNpc: 'dev-web', teamOpen: true } }));
+
+    await conn.logout();
+    const s = store.getState();
+    expect(s.connection).toBe('unauthorized');
+    expect(s.snapshot).toBeNull();
+    expect(s.ui.selectedNpc).toBeNull();
+    expect(s.ui.teamOpen).toBe(false);
+    expect(ws.readyState).toBe(3);
+    await timers.advance(120_000);
+    expect(FakeWebSocket.instances).toHaveLength(1); // no reconnect
+
+    // "Try again" asks once and stays on the access screen (no loop, no reload).
+    const before = sessionCalls;
+    conn.retryNow();
+    await flush();
+    expect(sessionCalls).toBe(before + 1);
+    expect(store.getState().connection).toBe('unauthorized');
+    await timers.advance(120_000);
+    expect(sessionCalls).toBe(before + 1);
+  });
+
+  it('CA-03: logout still signs out locally when the request fails', async () => {
+    const store = createStore<AppState>(initialState());
+    const conn = createConnection({
+      store,
+      timers: new FakeTimers(),
+      WebSocketImpl: WS,
+      wsUrl: 'ws://x/ws',
+      api: {
+        getSession: async () => ({ csrfToken: 'c'.repeat(32), lang: 'pt-BR' as const }),
+        patchConfig: async () => undefined,
+        getNpcHistory: async () => [],
+        getDiag: async () => ({}),
+        logout: async () => {
+          throw new TypeError('network down');
+        },
+      },
+    });
+    await conn.logout();
+    expect(store.getState().connection).toBe('unauthorized');
   });
 });

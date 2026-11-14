@@ -61,6 +61,8 @@ export interface OfficeSocketOptions {
   onStatus: (status: SocketStatus) => void;
   /** Called before each reconnect attempt; return false to stop (e.g. the session expired). */
   beforeReconnect?: () => Promise<boolean>;
+  /** The server closed the socket with 4401: the session ended (logout, token rotation). No retry. */
+  onUnauthorized?: () => void;
   WebSocketImpl?: typeof WebSocket;
   timers?: SocketTimers;
 }
@@ -117,9 +119,15 @@ export function createOfficeSocket(options: OfficeSocketOptions): OfficeSocket {
       const messages = parseFrame(event.data);
       if (messages.length > 0) options.onMessages(messages);
     };
-    ws.onclose = () => {
+    ws.onclose = (event?: { code?: number }) => {
       if (socket === ws) socket = null;
-      if (!closedByUs) scheduleRetry();
+      if (closedByUs) return;
+      if (event?.code === 4401) {
+        clearTimers();
+        options.onUnauthorized?.();
+        return;
+      }
+      scheduleRetry();
     };
     ws.onerror = () => {
       // `onclose` always follows; reconnect is scheduled there.

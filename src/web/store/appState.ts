@@ -5,7 +5,7 @@ import { DEFAULT_LANG, type Lang } from '../i18n/i18n';
 
 export type Connection = 'loading' | 'online' | 'offline' | 'unauthorized';
 export type PanelId = 'chat' | 'tasks' | 'approvals' | 'map';
-export type ModalId = 'credits' | 'shortcuts';
+export type ModalId = 'credits' | 'shortcuts' | 'logout';
 
 export interface HoverNpc {
   key: string;

@@ -3,7 +3,7 @@
 
 import type { ActivityItem } from '../../shared/contracts';
 import { hasStoredLang, storeLang, type Lang } from '../i18n/i18n';
-import { applyServerMessage, type AppState } from '../store/appState';
+import { applyServerMessage, initialState, type AppState } from '../store/appState';
 import type { Store } from '../store/store';
 import { ApiError, createApi, type Api } from './rest';
 import {
@@ -27,6 +27,8 @@ export interface Connection {
   stop(): void;
   setLanguage(lang: Lang): void;
   setSound(on: boolean): void;
+  /** Signs out: server session ended, local state cleared, access screen shown (no reload). */
+  logout(): Promise<void>;
   /** Recent activity of one NPC, newest first (rejects on network/HTTP errors). */
   npcHistory(key: string): Promise<ActivityItem[]>;
   /** Server counters (no content), for the "Desktop sessions not detected" hint. */
@@ -87,12 +89,31 @@ export function createConnection(deps: ConnectionDeps): Connection {
     }
   };
 
+  /** Local sign-out state: nothing of the office stays in memory, the access screen shows. */
+  const endSession = () => {
+    stopCountdown();
+    if (bootTimer !== null) timers.clearTimeout(bootTimer);
+    bootTimer = null;
+    socket?.close();
+    socket = null;
+    const fresh = initialState(store.getState().lang);
+    store.setState({
+      connection: 'unauthorized',
+      retryInSec: null,
+      snapshot: null,
+      roomSlots: fresh.roomSlots,
+      ui: fresh.ui,
+      notice: null,
+    });
+  };
+
   const ensureSocket = (): OfficeSocket => {
     socket ??= createOfficeSocket({
       url: deps.wsUrl ?? defaultWsUrl(),
       WebSocketImpl: deps.WebSocketImpl,
       timers,
       beforeReconnect: checkSession,
+      onUnauthorized: () => endSession(),
       onMessages: (messages) => {
         store.setState((state) => {
           let next = state;
@@ -143,6 +164,7 @@ export function createConnection(deps: ConnectionDeps): Connection {
         bootTimer = null;
         void boot();
       } else if (store.getState().connection === 'unauthorized') {
+        stopped = false; // retrying after a sign-out or an expired session
         store.setState({ connection: 'loading' });
         void boot();
       } else {
@@ -159,6 +181,12 @@ export function createConnection(deps: ConnectionDeps): Connection {
       store.setState({ lang });
       storeLang(lang);
       void api.patchConfig({ lang }).catch(() => undefined);
+    },
+    async logout() {
+      // Even if the request fails (already logged out, server gone) the local session is dropped.
+      await api.logout().catch(() => undefined);
+      stopped = true;
+      endSession();
     },
     npcHistory: (key) => api.getNpcHistory(key),
     diag: () => api.getDiag(),

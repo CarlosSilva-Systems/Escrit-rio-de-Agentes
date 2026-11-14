@@ -49,7 +49,7 @@ export function Topbar() {
   const otherLang: Lang = lang === 'pt-BR' ? 'en' : 'pt-BR';
 
   const toggleMenu = () => store.setState((s) => ({ ui: { ...s.ui, menuOpen: !s.ui.menuOpen } }));
-  const openModal = (modal: 'credits' | 'shortcuts') =>
+  const openModal = (modal: 'credits' | 'shortcuts' | 'logout') =>
     store.setState((s) => ({ ui: { ...s.ui, modal, menuOpen: false } }));
 
   return (
@@ -137,6 +137,14 @@ export function Topbar() {
               onClick={() => openModal('shortcuts')}
             >
               {t('set.shortcuts')}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="menu__item"
+              onClick={() => openModal('logout')}
+            >
+              {t('top.logout')}
             </button>
           </Menu>
         )}

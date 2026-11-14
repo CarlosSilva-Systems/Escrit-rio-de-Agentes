@@ -11,6 +11,7 @@ import { NpcCard } from './hud/npc/NpcCard';
 import { NpcPanel } from './hud/npc/NpcPanel';
 import { TeamDrawer } from './hud/npc/TeamDrawer';
 import { PanelShell } from './hud/PanelShell';
+import { LogoutConfirm } from './hud/LogoutConfirm';
 import { Shortcuts } from './hud/Shortcuts';
 import { Topbar } from './hud/topbar/Topbar';
 import { OfficeView } from './OfficeView';
@@ -119,6 +120,7 @@ export function App({ params }: { params: OfficeParams }) {
       </main>
       {modal === 'credits' && <Credits onClose={closeModal} />}
       {modal === 'shortcuts' && <Shortcuts onClose={closeModal} />}
+      {modal === 'logout' && <LogoutConfirm onClose={closeModal} />}
     </>
   );
 }

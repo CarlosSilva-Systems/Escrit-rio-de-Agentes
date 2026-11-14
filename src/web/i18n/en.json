@@ -151,5 +151,10 @@
   "diag.code.quadro.agent-duplicate": "Duplicate agent in {arquivo}: {agentType}.",
   "diag.code.quadro.too-many": "Too many agents in {arquivo}.",
   "diag.code.map.unreadable": "Couldn't read the map ({arquivo}).",
-  "diag.code.office.freelancer-limit": "Freelancer limit reached: {dropped} event(s) from unknown agents were dropped."
+  "diag.code.office.freelancer-limit": "Freelancer limit reached: {dropped} event(s) from unknown agents were dropped.",
+  "top.logout": "Sign out",
+  "logout.title": "Sign out of the office?",
+  "logout.body": "To come back you will need to open the office again from the shortcut. Claude Code sessions are not affected.",
+  "logout.confirm": "Sign out",
+  "common.cancel": "Cancel"
 }

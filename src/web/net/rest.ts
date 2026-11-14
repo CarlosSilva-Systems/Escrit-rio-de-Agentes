@@ -33,6 +33,8 @@ export interface Api {
   getNpcHistory(key: string): Promise<ActivityItem[]>;
   /** GET /api/diag: counters only, never content. */
   getDiag(): Promise<Record<string, number>>;
+  /** POST /api/auth/logout (session + Origin + CSRF): forgets the session and closes its sockets. */
+  logout(): Promise<void>;
 }
 
 type FetchFn = (input: string, init?: RequestInit) => Promise<Response>;
@@ -54,7 +56,7 @@ export function createApi(fetchFn: FetchFn = (i, init) => fetch(i, init)): Api {
   };
 
   const request = async (
-    method: 'GET' | 'PATCH',
+    method: 'GET' | 'PATCH' | 'POST',
     path: string,
     body?: unknown,
   ): Promise<Response> => {
@@ -62,7 +64,8 @@ export function createApi(fetchFn: FetchFn = (i, init) => fetch(i, init)): Api {
     if (method !== 'GET') {
       if (!csrfToken) throw new ApiError(0, 'no-csrf');
       headers[CSRF_HEADER] = csrfToken;
-      headers['content-type'] = 'application/json';
+      // Fastify answers 400 to a JSON content-type with an empty body (logout has none).
+      if (body !== undefined) headers['content-type'] = 'application/json';
     }
     const res = await fetchFn(path, {
       method,
@@ -81,6 +84,10 @@ export function createApi(fetchFn: FetchFn = (i, init) => fetch(i, init)): Api {
       if (!parsed.success) throw new ApiError(res.status, 'bad-session');
       csrfToken = parsed.data.csrfToken;
       return { csrfToken: parsed.data.csrfToken, lang: parsed.data.lang };
+    },
+    async logout() {
+      await request('POST', '/api/auth/logout');
+      csrfToken = null;
     },
     async getDiag() {
       const res = await request('GET', '/api/diag');
