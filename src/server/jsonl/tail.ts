@@ -136,6 +136,16 @@ export class JsonlTailer {
     }
     let state = this.states.get(path) ?? { offset: 0, size: 0, mtimeMs: 0, head: '' };
 
+    // Unchanged size AND mtime since the last poll (everything consumed): no head read needed.
+    if (
+      state.offset > 0 &&
+      st.size === state.offset &&
+      st.size === state.size &&
+      st.mtimeMs === state.mtimeMs
+    ) {
+      return result;
+    }
+
     // Truncation (shrunk) or replacement (same/larger size but different beginning).
     let reset = st.size < state.offset;
     if (!reset && state.offset > 0 && state.head !== '') {

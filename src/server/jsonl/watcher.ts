@@ -36,6 +36,8 @@ export interface JsonlWatcherOptions {
   pollMs?: number;
   /** Interval of the discovery walk (safety net for missed fs events). Default 15000. */
   discoverMs?: number;
+  /** A started subagent whose file shows no activity for this long gets a synthetic stop. Default 120 s. */
+  inactivityStopMs?: number;
   project?: CwdProjectOptions;
 }
 
@@ -45,6 +47,7 @@ export interface JsonlWatcherStats {
   eventsEmitted: number;
   ignoredLines: number;
   errors: number;
+  syntheticStops: number;
 }
 
 interface FileState {
@@ -67,6 +70,9 @@ interface FileState {
 const MAX_PENDING_RECORDS = 500;
 const MAX_SESSION_PROJECTS = 500;
 const IDLE_UNTRACK_MS = 30 * 60_000;
+const OLD_FILE_CACHE_MS = 5 * 60_000;
+const MAX_OLD_CACHE = 5000;
+const STOP_WAIT_MS = 2000;
 const SESSION_FILE_RE = /^([A-Za-z0-9_-]{8,64})\.jsonl$/;
 const DEBOUNCE_MS = 30;
 
@@ -85,7 +91,9 @@ export class JsonlWatcher {
   private queue: Promise<unknown> = Promise.resolve();
   private startedAt = 0;
   private stopped = true;
-  private readonly stat = { eventsEmitted: 0, ignoredLines: 0, errors: 0 };
+  /** Files known to be older than the active window (skipped by the safety-net walk for a while). */
+  private readonly oldUntil = new Map<string, number>();
+  private readonly stat = { eventsEmitted: 0, ignoredLines: 0, errors: 0, syntheticStops: 0 };
 
   constructor(private readonly options: JsonlWatcherOptions) {
     this.now = options.now ?? (() => Date.now());
@@ -105,18 +113,23 @@ export class JsonlWatcher {
   async start(): Promise<void> {
     this.stopped = false;
     this.startedAt = this.now();
-    await this.enqueue(() => this.walk(true));
-    this.attachWatcher();
-    this.pollTimer = setInterval(() => this.pollTracked(), this.options.pollMs ?? 2000);
-    this.discoverTimer = setInterval(
-      () => void this.enqueue(() => this.walk(false)),
-      this.options.discoverMs ?? 15_000,
-    );
-    this.pollTimer.unref();
-    this.discoverTimer.unref();
+    try {
+      await this.enqueue(() => this.walk(true));
+      this.attachWatcher();
+      this.pollTimer = setInterval(() => this.pollTracked(), this.options.pollMs ?? 2000);
+      this.discoverTimer = setInterval(
+        () => void this.enqueue(() => this.walk(false)),
+        this.options.discoverMs ?? 15_000,
+      );
+      this.pollTimer.unref();
+      this.discoverTimer.unref();
+    } catch {
+      this.stat.errors++; // the watcher is a fallback source: never take the server down
+    }
   }
 
-  stop(): void {
+  /** Stops watching and waits (bounded) for the work already in flight. */
+  async stop(): Promise<void> {
     this.stopped = true;
     this.fsWatcher?.close();
     this.fsWatcher = null;
@@ -127,6 +140,14 @@ export class JsonlWatcher {
     for (const t of this.timers.values()) clearTimeout(t);
     this.timers.clear();
     for (const f of this.files.values()) if (f.graceTimer) clearTimeout(f.graceTimer);
+    let timer: NodeJS.Timeout | undefined;
+    await Promise.race([
+      this.queue.catch(() => undefined),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, STOP_WAIT_MS);
+      }),
+    ]);
+    if (timer) clearTimeout(timer);
   }
 
   /** Test helper: resolves when the work queued so far finished. */
@@ -179,15 +200,35 @@ export class JsonlWatcher {
 
   private pollTracked(): void {
     const t = this.now();
-    for (const f of this.files.values()) {
-      if (!f.tracked || f.stopped) continue;
-      if (t - f.lastActivity > IDLE_UNTRACK_MS) {
-        f.tracked = false;
-        this.ingestor.forget(f.path);
+    const inactivityMs = this.options.inactivityStopMs ?? 120_000;
+    for (const [path, f] of this.files) {
+      const idle = t - f.lastActivity > IDLE_UNTRACK_MS;
+      if (idle && (f.stopped || !f.tracked || f.kind === 'main')) {
+        // Prune: finished, abandoned or long-idle files must not accumulate forever.
+        this.files.delete(path);
+        this.ingestor.forget(path);
         continue;
       }
-      this.schedule(f.path);
+      if (!f.tracked || f.stopped) continue;
+      if (f.kind === 'sub' && f.started && t - f.lastActivity >= inactivityMs) {
+        void this.enqueue(() => this.syntheticStop(f));
+        continue;
+      }
+      this.schedule(path);
     }
+  }
+
+  /** A subagent that went silent without a `finished` meta (crash/kill): close it (CA-18). */
+  private async syntheticStop(state: FileState): Promise<void> {
+    if (state.stopped || !state.started) return;
+    const inactivityMs = this.options.inactivityStopMs ?? 120_000;
+    await this.drain(state); // late lines count as activity
+    if (this.now() - state.lastActivity < inactivityMs) return;
+    state.stopped = true;
+    state.tracked = false;
+    this.ingestor.forget(state.path);
+    this.stat.syntheticStops++;
+    this.emitEvent({ kind: 'subagent.stop', state });
   }
 
   private enqueue(task: () => Promise<void>): Promise<void> {
@@ -253,8 +294,15 @@ export class JsonlWatcher {
   }
 
   private async isRecent(path: string, cutoff: number): Promise<boolean> {
+    const t = this.now();
+    if ((this.oldUntil.get(path) ?? 0) > t) return false; // known old: skip the stat
     try {
-      return (await stat(path)).mtimeMs >= cutoff;
+      const recent = (await stat(path)).mtimeMs >= cutoff;
+      if (!recent) {
+        if (this.oldUntil.size >= MAX_OLD_CACHE) this.oldUntil.clear();
+        this.oldUntil.set(path, t + OLD_FILE_CACHE_MS);
+      }
+      return recent;
     } catch {
       return false;
     }
