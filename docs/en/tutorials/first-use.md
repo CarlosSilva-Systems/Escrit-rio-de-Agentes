@@ -91,7 +91,7 @@ Closing the tab leaves the server running in the background (it uses almost no C
 node dist/cli.js stop
 ```
 
-The next `npm run open` starts it again. If the browser later shows "Open the office from the shortcut" (the session expired), just run the shortcut again.
+To leave the office signed out, open **Settings → Sign out** and confirm; your Claude Code sessions are not affected. The next `npm run open` starts the server again and signs you in. If the browser later shows "Open the office from the shortcut" (the session expired), just run the shortcut again.
 
 ## Next steps
 

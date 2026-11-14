@@ -4,24 +4,22 @@
 
 Goal: make sure nobody can use the office from this browser any more.
 
-> **There is no "Log out" button in the interface yet.** The server has a logout route, but nothing in Phase 1's screen calls it. Use one of the options below.
+## Sign out from the interface
 
-## Option A: sign out every browser (recommended)
+1. Press **Settings** in the top bar.
+2. Choose **Sign out**.
+3. A dialog asks "Sign out of the office?" and warns that to come back you must open the office again from the shortcut. Your Claude Code sessions are not affected. Confirm with **Sign out**.
 
-Rotate the token. It invalidates all sessions at once and closes open tabs' connections:
+The server forgets this browser's session, the cookie is removed and the page shows "Open the office from the shortcut" without reloading. To get back in, run the shortcut or `npm run open`.
 
-```
-node dist/cli.js token:rotate
-```
+## Alternatives
 
-Details: [Rotate the access token](rotate-token.md).
+- **Sign out every browser at once:** rotate the token with `node dist/cli.js token:rotate` ([Rotate the access token](rotate-token.md)).
+- **Forget this browser from the browser side:** delete the cookie `esc_sid` of `127.0.0.1` in the browser's site settings, then reload.
 
-## Option B: forget this browser only
+## When a session ends by itself
 
-1. In the browser, open the site settings for `127.0.0.1` and delete its cookies (look for the cookie `esc_sid`). In Edge: padlock or tune icon in the address bar → Cookies → remove.
-2. Reload the page. It shows "Open the office from the shortcut".
-
-The session also ends by itself: after **8 hours without use**, or **24 hours after it started**, whichever comes first. Then reopen the office from the shortcut (`npm run open`).
+After **8 hours without use** (the 8 hours restart each time you use the office) or **24 hours after it started**, whichever comes first. Reopen from the shortcut.
 
 ## What does not log you out
 
