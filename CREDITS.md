@@ -6,5 +6,5 @@ Checked by `npm run credits:check`. Code derived from Pixel Agents is listed in 
 | Asset | Author | License | URL |
 | ----- | ------ | ------- | --- |
 | Provisional art (tiles, furniture, characters, icons) drawn in code, `src/web/engine/art/` | Escritório da Equipe project | MIT | https://github.com/pablodelucca/pixel-agents (concept only; no art or code copied) |
-| Pixelify Sans (planned, not bundled yet: needs approval to download) | Stefie Justprince | OFL 1.1 | https://fonts.google.com/specimen/Pixelify+Sans |
-| Silkscreen (planned, not bundled yet: needs approval to download) | Jason Kottke | OFL 1.1 | https://fonts.google.com/specimen/Silkscreen |
+| Pixelify Sans (variable TTF, `assets/fonts/PixelifySans-Variable.ttf`; OFL.txt ships alongside) | The Pixelify Sans Project Authors (2021) | SIL OFL 1.1 | https://github.com/eifetx/Pixelify-Sans (obtained from google/fonts `ofl/pixelifysans`) |
+| Silkscreen Regular and Bold (TTF, `assets/fonts/Silkscreen-*.ttf`; OFL.txt ships alongside) | The Silkscreen Project Authors (2001) | SIL OFL 1.1 | https://github.com/googlefonts/silkscreen (obtained from google/fonts `ofl/silkscreen`) |
