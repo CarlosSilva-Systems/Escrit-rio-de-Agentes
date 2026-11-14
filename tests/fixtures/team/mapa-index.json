@@ -1,0 +1,140 @@
+{
+  "schema": "mapa/v1",
+  "note": "Loose map index fixture for team tests (not a full mapa/v1 document).",
+  "rooms": [
+    {
+      "id": "DIR",
+      "department": "diretoria"
+    },
+    {
+      "id": "PLN",
+      "department": "planejamento"
+    },
+    {
+      "id": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "QUA",
+      "department": "qualidade"
+    },
+    {
+      "id": "SOC",
+      "department": "qualidade"
+    },
+    {
+      "id": "ENT",
+      "department": "entrega"
+    },
+    {
+      "id": "BIB",
+      "department": "biblioteca"
+    },
+    {
+      "id": "REC"
+    }
+  ],
+  "desks": [
+    {
+      "id": "DIR-00",
+      "room": "DIR",
+      "department": "diretoria"
+    },
+    {
+      "id": "PLN-01",
+      "room": "PLN",
+      "department": "planejamento"
+    },
+    {
+      "id": "PLN-02",
+      "room": "PLN",
+      "department": "planejamento"
+    },
+    {
+      "id": "PLN-03",
+      "room": "PLN",
+      "department": "planejamento"
+    },
+    {
+      "id": "ENG-01",
+      "room": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "ENG-02",
+      "room": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "ENG-03",
+      "room": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "ENG-04",
+      "room": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "ENG-05",
+      "room": "ENG",
+      "department": "engenharia"
+    },
+    {
+      "id": "QUA-01",
+      "room": "QUA",
+      "department": "qualidade"
+    },
+    {
+      "id": "QUA-02",
+      "room": "QUA",
+      "department": "qualidade"
+    },
+    {
+      "id": "SOC-01",
+      "room": "SOC",
+      "department": "qualidade"
+    },
+    {
+      "id": "SOC-02",
+      "room": "SOC",
+      "department": "qualidade"
+    },
+    {
+      "id": "ENT-01",
+      "room": "ENT",
+      "department": "entrega"
+    },
+    {
+      "id": "ENT-02",
+      "room": "ENT",
+      "department": "entrega"
+    },
+    {
+      "id": "BIB-01",
+      "room": "BIB",
+      "department": "biblioteca"
+    },
+    {
+      "id": "ENG-06",
+      "room": "ENG",
+      "department": "engenharia",
+      "vacancy": true
+    },
+    {
+      "id": "FL-D1",
+      "room": "REC"
+    },
+    {
+      "id": "FL-D2",
+      "room": "REC"
+    }
+  ],
+  "seats": [
+    {
+      "id": "FL-S1",
+      "room": "REC",
+      "kind": "sofa"
+    }
+  ]
+}
