@@ -19,6 +19,7 @@ import { registerSecurityHeaders } from './http/guards/headers';
 import { registerHostGuard } from './http/guards/host';
 import { findPortOwner, LOOPBACK_HOST, NetContext, type PortOwner } from './http/net';
 import { isApiLikePath, normalizeRequestPath } from './http/path';
+import { registerConfigRoutes } from './http/routes/config';
 import { registerStatic } from './http/static';
 import { t } from './i18n';
 import { createLoggerOptions, LogSink, pruneOldLogs } from './log';
@@ -155,6 +156,7 @@ export async function buildApp(options: BuildAppOptions): Promise<ServerContext>
     webServed: false,
   };
   ref.ctx = ctx;
+  registerConfigRoutes(app, { config });
   if (options.extraRoutes) await options.extraRoutes(ctx);
   ctx.webServed = await registerStatic(app, webRoot, getLang);
 
