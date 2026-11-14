@@ -1,0 +1,11 @@
+{
+  "schema": "uso/v1",
+  "updatedAt": "2026-11-12T22:10:05.120Z",
+  "windows": {
+    "fiveHour": {
+      "usedPercentage": 120,
+      "resetsAt": 1794530000,
+      "stale": true
+    }
+  }
+}
