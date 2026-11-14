@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://escritorio-equipe.local/schemas/uso.v1.schema.json",
+  "title": "uso.json (uso/v1)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "uso/v1"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "sessionId": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "model": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "windows": {
+      "type": "object",
+      "properties": {
+        "fiveHour": {
+          "type": "object",
+          "properties": {
+            "usedPercentage": {
+              "type": "number"
+            },
+            "resetsAt": {
+              "type": "number"
+            },
+            "observedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            "stale": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "usedPercentage",
+            "resetsAt"
+          ]
+        },
+        "sevenDay": {
+          "type": "object",
+          "properties": {
+            "usedPercentage": {
+              "type": "number"
+            },
+            "resetsAt": {
+              "type": "number"
+            },
+            "observedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            "stale": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "usedPercentage",
+            "resetsAt"
+          ]
+        }
+      }
+    },
+    "spendLimit": {
+      "anyOf": [
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "extraWindows": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "usedPercentage": {
+            "type": "number"
+          },
+          "resetsAt": {
+            "type": "number"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "usedPercentage",
+          "resetsAt"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "updatedAt",
+    "windows"
+  ]
+}

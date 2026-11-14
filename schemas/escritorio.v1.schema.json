@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://escritorio-equipe.local/schemas/escritorio.v1.schema.json",
+  "title": "escritorio.json (escritorio/v1)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "escritorio/v1"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "studio": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "nameIsProvisional": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "departments": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "colorToken": {
+            "type": "string",
+            "pattern": "^dept-[a-z0-9-]+$"
+          },
+          "rooms": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "colorToken",
+          "rooms"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "agents": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agentType": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "nickname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 60
+          },
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "desk": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16,
+                "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provisional": {
+            "default": false,
+            "type": "boolean"
+          },
+          "sprite": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "badge": {
+            "default": "staff",
+            "type": "string",
+            "enum": [
+              "staff",
+              "diretoria"
+            ]
+          },
+          "isLead": {
+            "default": false,
+            "type": "boolean"
+          },
+          "since": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "personality": {
+            "type": "object",
+            "properties": {
+              "traits": {
+                "minItems": 1,
+                "maxItems": 6,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 30
+                }
+              },
+              "tone": {
+                "type": "string",
+                "maxLength": 160
+              },
+              "routineWeights": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "enum": [
+                    "coffee",
+                    "copa-chat",
+                    "water",
+                    "window",
+                    "terrace",
+                    "arcade",
+                    "pingpong",
+                    "bathroom",
+                    "library",
+                    "sofa"
+                  ]
+                },
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                }
+              }
+            },
+            "required": [
+              "traits",
+              "tone"
+            ],
+            "additionalProperties": false
+          },
+          "phrases": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          }
+        },
+        "required": [
+          "agentType",
+          "nickname",
+          "fullName",
+          "title",
+          "department",
+          "desk",
+          "sprite",
+          "personality",
+          "phrases"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "freelancer": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "sprite": {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "badge": {
+          "type": "string",
+          "const": "visitante"
+        },
+        "showAgentTypeAsLabel": {
+          "default": true,
+          "type": "boolean"
+        },
+        "phrases": {
+          "maxItems": 50,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "homeRoom": {
+          "type": "string",
+          "maxLength": 16,
+          "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+        }
+      },
+      "required": [
+        "nickname",
+        "title",
+        "sprite",
+        "badge",
+        "phrases",
+        "homeRoom"
+      ],
+      "additionalProperties": false
+    },
+    "mascots": {
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24
+          },
+          "species": {
+            "type": "string",
+            "enum": [
+              "pomeranian",
+              "golden-retriever"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "sprite": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "species",
+          "sprite"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "studio",
+    "departments",
+    "agents",
+    "freelancer"
+  ],
+  "additionalProperties": false
+}

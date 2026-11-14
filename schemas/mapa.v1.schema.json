@@ -1,0 +1,1072 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://escritorio-equipe.local/schemas/mapa.v1.schema.json",
+  "title": "mapa.json (mapa/v1)",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "mapa/v1"
+    },
+    "tileSize": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cols": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 256
+    },
+    "rows": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 256
+    },
+    "tilesets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "columns": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "license": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "image",
+          "columns",
+          "license"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "layers": {
+      "type": "object",
+      "properties": {
+        "floor": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "walls": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "decorBelow": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "decorAbove": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "required": [
+        "floor",
+        "walls",
+        "decorBelow",
+        "decorAbove"
+      ],
+      "additionalProperties": false
+    },
+    "collision": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+    },
+    "rooms": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 48
+          },
+          "nameKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "rects": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "faceRows": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "doors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+            }
+          },
+          "lightZone": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "camera": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "nameKey",
+          "rects",
+          "doors"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "doors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "tiles": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "connects": {
+            "minItems": 2,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tiles",
+          "connects"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "desks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 48
+          },
+          "seat": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "facing": {
+            "type": "string",
+            "enum": [
+              "north",
+              "south",
+              "east",
+              "west"
+            ]
+          },
+          "table": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "vacancy": {
+            "type": "boolean"
+          },
+          "decor": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          }
+        },
+        "required": [
+          "id",
+          "room",
+          "seat",
+          "facing"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "seats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "tile": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "facing": {
+            "type": "string",
+            "enum": [
+              "north",
+              "south",
+              "east",
+              "west"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "meeting",
+              "project",
+              "sofa",
+              "provisional",
+              "visitor"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "room",
+          "tile",
+          "facing",
+          "kind"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pois": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "coffee",
+              "water",
+              "fridge",
+              "snacks",
+              "copa-table",
+              "sofa",
+              "tv",
+              "arcade",
+              "pingpong",
+              "window",
+              "terrace",
+              "hammock",
+              "bathroom-door",
+              "director-door-wait",
+              "meeting-seat",
+              "reception-wait"
+            ]
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "tiles": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "facing": {
+            "type": "string",
+            "enum": [
+              "north",
+              "south",
+              "east",
+              "west"
+            ]
+          },
+          "capacity": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "activity": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "durationSec": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "room",
+          "tiles",
+          "capacity",
+          "activity",
+          "durationSec"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "sprite": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "tile": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "footprint": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "anim": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "light": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "sprite",
+          "tile",
+          "footprint"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "lightZones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "rooms": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "activity",
+              "night",
+              "always"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "rooms",
+          "mode"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "lights": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "zone": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "tile": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "sprite": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        },
+        "required": [
+          "id",
+          "zone",
+          "tile",
+          "sprite",
+          "color"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "rect": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "city",
+              "garden",
+              "sky"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "room",
+          "rect",
+          "view"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "boards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "metas",
+              "bugs",
+              "git-branches",
+              "tv-kanban",
+              "active-projects"
+            ]
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "rect": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projectSlots": {
+      "minItems": 4,
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          },
+          "doorSign": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "board": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "progressBar": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "seats": {
+            "minItems": 1,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+            }
+          }
+        },
+        "required": [
+          "slot",
+          "room",
+          "doorSign",
+          "board",
+          "progressBar",
+          "seats"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "spawn": {
+      "type": "object",
+      "properties": {
+        "entrance": {
+          "type": "string",
+          "maxLength": 16,
+          "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+        },
+        "receptionCounter": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "approvalQueue": {
+          "minItems": 1,
+          "maxItems": 8,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          }
+        },
+        "provisionalDesks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          }
+        },
+        "freelancerSofa": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          }
+        }
+      },
+      "required": [
+        "entrance",
+        "receptionCounter",
+        "approvalQueue",
+        "provisionalDesks",
+        "freelancerSofa"
+      ],
+      "additionalProperties": false
+    },
+    "pets": {
+      "type": "object",
+      "properties": {
+        "beds": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "forbiddenRooms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 16,
+            "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"
+          }
+        }
+      },
+      "required": [
+        "beds",
+        "forbiddenRooms"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema",
+    "tileSize",
+    "cols",
+    "rows",
+    "tilesets",
+    "layers",
+    "collision",
+    "rooms",
+    "doors",
+    "desks",
+    "seats",
+    "pois",
+    "objects",
+    "lightZones",
+    "lights",
+    "windows",
+    "boards",
+    "projectSlots",
+    "spawn",
+    "pets"
+  ],
+  "additionalProperties": false
+}

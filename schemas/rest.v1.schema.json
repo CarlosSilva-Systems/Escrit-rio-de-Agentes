@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://escritorio-equipe.local/schemas/rest.v1.schema.json",
+  "title": "REST request/response bodies (v1)",
+  "$defs": {
+    "AuthTicketResponse": {
+      "type": "object",
+      "properties": {
+        "ticket": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        },
+        "expiresInSec": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 300
+        }
+      },
+      "required": [
+        "ticket",
+        "expiresInSec"
+      ]
+    },
+    "HealthResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 40
+        }
+      },
+      "required": [
+        "ok",
+        "version"
+      ]
+    },
+    "SessionResponse": {
+      "type": "object",
+      "properties": {
+        "csrfToken": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        },
+        "lang": {
+          "type": "string",
+          "enum": [
+            "pt-BR",
+            "en"
+          ]
+        }
+      },
+      "required": [
+        "csrfToken",
+        "lang"
+      ]
+    },
+    "ConfigPatch": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "type": "string",
+          "enum": [
+            "pt-BR",
+            "en"
+          ]
+        },
+        "sound": {
+          "type": "boolean"
+        },
+        "music": {
+          "type": "boolean"
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "approvalDeadlineSec": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 300
+        },
+        "chatMode": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "interactive",
+              "automatic"
+            ]
+          }
+        },
+        "npcWorkPlace": {
+          "type": "string",
+          "enum": [
+            "desk",
+            "projectRoom",
+            "auto"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProjectCreateRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "ProjectSessionsResponse": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "startedAt": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "messageCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id",
+              "startedAt",
+              "messageCount"
+            ]
+          }
+        }
+      },
+      "required": [
+        "sessions"
+      ]
+    },
+    "ChatSessionCreateRequest": {
+      "type": "object",
+      "properties": {
+        "projectName": {
+          "type": "string"
+        },
+        "resumeSessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "interactive",
+            "automatic"
+          ]
+        }
+      },
+      "required": [
+        "projectName"
+      ],
+      "additionalProperties": false
+    },
+    "ChatMessageRequest": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "TerminalInputRequest": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "ApprovalDecisionRequest": {
+      "type": "object",
+      "properties": {
+        "behavior": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "behavior"
+      ],
+      "additionalProperties": false
+    },
+    "ApprovalDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "toolName": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "details": {
+          "type": "string",
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "id",
+        "toolName",
+        "details"
+      ]
+    },
+    "NpcHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "ts": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "npcKey": {
+                "type": "string",
+                "maxLength": 160
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "session.start",
+                  "session.end",
+                  "prompt.submit",
+                  "turn.stop",
+                  "tool.pre",
+                  "tool.post",
+                  "tool.fail",
+                  "subagent.start",
+                  "subagent.stop",
+                  "permission.request",
+                  "notification",
+                  "task.created",
+                  "task.completed"
+                ]
+              },
+              "project": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dev"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "outside"
+                      },
+                      "basename": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "basename"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "unknown"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ]
+                  }
+                ]
+              },
+              "tool": {
+                "type": "string",
+                "enum": [
+                  "edit",
+                  "read",
+                  "bash",
+                  "web",
+                  "delegate",
+                  "task",
+                  "plan",
+                  "other"
+                ]
+              },
+              "taskRef": {
+                "type": "string",
+                "maxLength": 16
+              },
+              "summary": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "id",
+              "ts",
+              "npcKey",
+              "kind",
+              "project"
+            ]
+          }
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "TokensQuery": {
+      "type": "object",
+      "properties": {
+        "group": {
+          "default": "project",
+          "type": "string",
+          "enum": [
+            "project",
+            "agent",
+            "day"
+          ]
+        },
+        "days": {
+          "default": 14,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 400
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
