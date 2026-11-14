@@ -79,6 +79,18 @@ export class WsHub {
     for (const client of this.clients) this.send(client, payload);
   }
 
+  /** Closes the sockets of one browser session (logout). */
+  closeSession(sessionKey: string): void {
+    for (const client of [...this.clients]) {
+      if (client.sessionKey !== sessionKey) continue;
+      try {
+        client.socket.close(4401, 'logged out');
+      } catch {
+        client.socket.terminate();
+      }
+    }
+  }
+
   /** Closes every socket (session invalidated, shutdown). */
   closeAll(code: number, reason: string): void {
     for (const client of [...this.clients]) {

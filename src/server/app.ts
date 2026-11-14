@@ -9,6 +9,7 @@ import { ensureHome, removeRuntimeInfo, TokenStore, writeRuntimeInfo } from './h
 import {
   DEFAULT_RATE_LIMITS,
   registerAuth,
+  SESSION_COOKIE,
   SessionStore,
   TicketStore,
   type RateLimits,
@@ -17,6 +18,7 @@ import { registerErrorHandling } from './http/errors';
 import { registerSecurityHeaders } from './http/guards/headers';
 import { registerHostGuard } from './http/guards/host';
 import { findPortOwner, LOOPBACK_HOST, NetContext, type PortOwner } from './http/net';
+import { isApiLikePath, normalizeRequestPath } from './http/path';
 import { registerStatic } from './http/static';
 import { t } from './i18n';
 import { createLoggerOptions, LogSink, pruneOldLogs } from './log';
@@ -101,9 +103,14 @@ export async function buildApp(options: BuildAppOptions): Promise<ServerContext>
     max: limits.general,
     timeWindow: '1 minute',
     // Static files are not limited (a page load fetches many); API/auth/ws routes are.
-    allowList: (request) => {
-      const url = request.url;
-      return !(url.startsWith('/api/') || url.startsWith('/auth/') || url.startsWith('/ws'));
+    // Decided on the NORMALIZED path: `/%61uth/callback` is the same route as `/auth/callback`.
+    allowList: (request) => !isApiLikePath(normalizeRequestPath(request.url)),
+    // Requests with a valid session have their own bucket; everything else (probes without a
+    // cookie, bad cookies) shares an anonymous per-address bucket, so a flood of 401s cannot
+    // lock the UI out.
+    keyGenerator: (request) => {
+      const key = sessions.peekKey(request.cookies?.[SESSION_COOKIE]);
+      return key ? `s:${key}` : `ip:${request.ip}`;
     },
     errorResponseBuilder: () => Object.assign(new Error('rate limited'), { statusCode: 429 }),
   });
@@ -125,6 +132,7 @@ export async function buildApp(options: BuildAppOptions): Promise<ServerContext>
     getLang,
     version,
     limits,
+    onSessionEnded: (key) => hub.closeSession(key),
     onShutdownRequest: () => {
       if (options.onShutdownRequest) options.onShutdownRequest();
       else void app.close();
@@ -150,6 +158,14 @@ export async function buildApp(options: BuildAppOptions): Promise<ServerContext>
   if (options.extraRoutes) await options.extraRoutes(ctx);
   ctx.webServed = await registerStatic(app, webRoot, getLang);
 
+  // An idle office makes no HTTP request, so the token files are also checked on a timer while
+  // sockets are open (BUG-04): `token:rotate` revokes them within about a second.
+  const rotationWatch = setInterval(() => {
+    if (hub.clientCount() > 0) void tokens.reloadIfChanged().catch(() => false);
+  }, 1000);
+  rotationWatch.unref();
+  app.addHook('onClose', async () => clearInterval(rotationWatch));
+
   // `token:rotate` (another process) invalidates every browser session and open socket.
   tokens.on('rotated', () => {
     sessions.clear();
@@ -168,7 +184,7 @@ export async function buildApp(options: BuildAppOptions): Promise<ServerContext>
 
   // One metadata line per API/auth call (method, path without query, status, latency): no bodies.
   app.addHook('onResponse', async (request, reply) => {
-    const path = request.url.split('?')[0] ?? '';
+    const path = normalizeRequestPath(request.url);
     if (path === '/api/health' || !(path.startsWith('/api/') || path.startsWith('/auth/'))) return;
     request.log.info(
       { method: request.method, path, status: reply.statusCode, ms: Math.round(reply.elapsedTime) },

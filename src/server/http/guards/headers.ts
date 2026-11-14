@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { NetContext } from '../net';
+import { normalizeRequestPath } from '../path';
 
 /** Content-Security-Policy of ADR-0005 for the given port. */
 export function buildCsp(port: number): string {
@@ -29,7 +30,7 @@ export function registerSecurityHeaders(app: FastifyInstance, net: NetContext) {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('Cross-Origin-Opener-Policy', 'same-origin');
     reply.header('Cross-Origin-Resource-Policy', 'same-origin');
-    const path = request.url;
+    const path = normalizeRequestPath(request.url);
     if (path.startsWith('/api/') || path.startsWith('/auth/')) {
       reply.header('Cache-Control', 'no-store');
     }
