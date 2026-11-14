@@ -1,0 +1,15 @@
+# Default: normalize text to LF in the repository
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets: never normalize or diff
+*.png binary
+*.jpg binary
+*.gif binary
+*.ttf binary
+*.woff2 binary
+*.ogg binary
+*.mp3 binary
