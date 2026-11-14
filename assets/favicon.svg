@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+  <!-- Team Office icon: a pixel-art office window over a gold desk (Diretoria colour). Original art of this project (MIT). -->
+  <rect x="0" y="0" width="16" height="16" fill="#3B2A20"/>
+  <rect x="1" y="1" width="14" height="14" fill="#F3E6CC"/>
+  <rect x="3" y="2" width="10" height="6" fill="#B98C5A"/>
+  <rect x="4" y="3" width="8" height="4" fill="#BFE3F5"/>
+  <rect x="7" y="3" width="2" height="4" fill="#B98C5A"/>
+  <rect x="4" y="3" width="2" height="1" fill="#FFFFFF"/>
+  <rect x="2" y="10" width="12" height="2" fill="#EDBE45"/>
+  <rect x="2" y="12" width="12" height="2" fill="#C9962A"/>
+  <rect x="3" y="14" width="2" height="1" fill="#3B2A20"/>
+  <rect x="11" y="14" width="2" height="1" fill="#3B2A20"/>
+  <rect x="9" y="8" width="3" height="2" fill="#4FB3A5"/>
+</svg>
