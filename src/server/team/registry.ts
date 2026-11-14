@@ -101,7 +101,7 @@ export class TeamRegistry {
     const { watcher, escritorioPath, quadroPath } = this.deps;
     if (watcher && !this.closeWatch) {
       this.closeWatch = watcher.watch([escritorioPath, quadroPath], () => {
-        void this.load();
+        this.load().catch(() => undefined); // a failed reload keeps the current snapshot
       });
     }
     return first;

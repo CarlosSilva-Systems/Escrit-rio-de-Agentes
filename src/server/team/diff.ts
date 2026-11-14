@@ -4,6 +4,8 @@ import type { TeamView } from '../../shared/contracts';
 
 // Team diff -> `team.diff` event (T-30a, CA-21): drives the welcome/farewell scenes and the
 // "provisional desk" warning. Pure.
+// PLANNED, no consumer yet: the welcome/farewell scenes (T-30b, phase 4) will read it; until then
+// the web derives the same thing from the WS `team` message. Kept on purpose (registry emits it).
 
 const COMPARED_FIELDS = [
   'nickname',

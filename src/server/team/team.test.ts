@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { EscritorioSchema, TeamViewSchema } from '../../shared/contracts';
+import { DiagnosticSchema, EscritorioSchema, TeamViewSchema } from '../../shared/contracts';
 import type { Escritorio, TeamView } from '../../shared/contracts';
 import { checkConsistency, parseMapIndex } from './consistency';
 import { diffTeams, TeamDiffEventSchema, toTeamDiffEvent } from './diff';
@@ -345,7 +345,24 @@ describe('TeamRegistry (CA-12, CA-13, CA-17, CA-21)', () => {
     expect(change.snapshot.view.agents).toHaveLength(16);
     expect(change.snapshot.diagnostics.map((d) => d.path)).toContain('agents.5.fullName');
     expect(change.diff).toBeNull();
-    expect(registry.publicDiagnostics.every((d) => !('code' in d))).toBe(true);
+    // the public diagnostic carries the stable code (and bounded params) for i18n
+    expect(registry.publicDiagnostics.every((d) => typeof d.code === 'string')).toBe(true);
+    expect(
+      registry.publicDiagnostics.find((d) => d.path === 'agents.5.fullName')?.params?.field,
+    ).toBe('agents.5.fullName');
+  });
+
+  it('CA-13: a missing escritorio.json is public as code team.file-missing, without file content', async () => {
+    const registry = new TeamRegistry({
+      escritorioPath: 'E',
+      quadroPath: 'Q',
+      readText: async () => null,
+      sleep: async () => undefined,
+    });
+    await registry.load();
+    const d = registry.publicDiagnostics.find((x) => x.code === 'team.file-missing');
+    expect(d).toMatchObject({ file: 'escritorio.json', severity: 'error' });
+    expect(DiagnosticSchema.safeParse(d).success).toBe(true);
   });
 
   it('CA-13: a half-written file is re-read once and accepted when it becomes valid', async () => {
