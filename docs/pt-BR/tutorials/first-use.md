@@ -91,7 +91,7 @@ Fechar a aba deixa o servidor rodando em segundo plano (ele usa quase nada de CP
 node dist/cli.js stop
 ```
 
-O próximo `npm run open` liga de novo. Se depois o navegador mostrar "Abra o escritório pelo atalho" (a sessão expirou), é só usar o atalho outra vez.
+Para deixar o escritório deslogado, abra **Configurações → Sair** e confirme; as suas sessões do Claude Code não são afetadas. O próximo `npm run open` liga o servidor de novo e entra por você. Se depois o navegador mostrar "Abra o escritório pelo atalho" (a sessão expirou), é só usar o atalho outra vez.
 
 ## Próximos passos
 

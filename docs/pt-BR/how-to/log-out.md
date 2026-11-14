@@ -4,24 +4,22 @@
 
 Objetivo: garantir que ninguém mais consiga usar o escritório a partir deste navegador.
 
-> **Ainda não existe um botão "Sair" na interface.** O servidor tem uma rota de logout, mas nenhuma tela da Fase 1 a chama. Use uma das opções abaixo.
+## Sair pela interface
 
-## Opção A: deslogar todos os navegadores (recomendada)
+1. Aperte **Configurações** na barra superior.
+2. Escolha **Sair**.
+3. Uma janela pergunta "Sair do escritório?" e avisa que, para voltar, você precisa abrir o escritório de novo pelo atalho. As suas sessões do Claude Code não são afetadas. Confirme com **Sair**.
 
-Gire o token. Isso invalida todas as sessões de uma vez e derruba as conexões das abas abertas:
+O servidor esquece a sessão deste navegador, o cookie é removido e a página mostra "Abra o escritório pelo atalho" sem recarregar. Para entrar de novo, use o atalho ou `npm run open`.
 
-```
-node dist/cli.js token:rotate
-```
+## Alternativas
 
-Detalhes: [Girar o token de acesso](rotate-token.md).
+- **Deslogar todos os navegadores de uma vez:** gire o token com `node dist/cli.js token:rotate` ([Girar o token de acesso](rotate-token.md)).
+- **Esquecer este navegador pelo lado do navegador:** apague o cookie `esc_sid` de `127.0.0.1` nas configurações de site e recarregue.
 
-## Opção B: esquecer só este navegador
+## Quando a sessão termina sozinha
 
-1. No navegador, abra as configurações do site `127.0.0.1` e apague os cookies dele (procure o cookie `esc_sid`). No Edge: cadeado ou ícone de ajustes na barra de endereço → Cookies → remover.
-2. Recarregue a página. Ela mostra "Abra o escritório pelo atalho".
-
-A sessão também termina sozinha: depois de **8 horas sem uso**, ou **24 horas depois de iniciada**, o que vier primeiro. Aí é só reabrir o escritório pelo atalho (`npm run open`).
+Depois de **8 horas sem uso** (as 8 horas recomeçam a cada uso do escritório) ou **24 horas depois de iniciada**, o que vier primeiro. Reabra pelo atalho.
 
 ## O que não faz logout
 
