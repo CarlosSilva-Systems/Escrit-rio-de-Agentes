@@ -31,6 +31,10 @@ export const DiagnosticSchema = z.object({
   path: z.string().max(200).optional(),
   message: z.string().max(300),
   severity: z.enum(['info', 'warning', 'error']).default('warning'),
+  /** Stable machine code (e.g. `team.file-missing`) the UI maps to an i18n message. */
+  code: z.string().max(64).optional(),
+  /** Short plain values for the i18n template (ids, field names, positions; never file content). */
+  params: z.record(z.string().max(40), z.string().max(100)).optional(),
 });
 export type Diagnostic = z.infer<typeof DiagnosticSchema>;
 

@@ -1269,6 +1269,21 @@
                   "warning",
                   "error"
                 ]
+              },
+              "code": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "params": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "maxLength": 100
+                }
               }
             },
             "required": [
@@ -2365,6 +2380,21 @@
                                     "warning",
                                     "error"
                                   ]
+                                },
+                                "code": {
+                                  "type": "string",
+                                  "maxLength": 64
+                                },
+                                "params": {
+                                  "type": "object",
+                                  "propertyNames": {
+                                    "type": "string",
+                                    "maxLength": 40
+                                  },
+                                  "additionalProperties": {
+                                    "type": "string",
+                                    "maxLength": 100
+                                  }
                                 }
                               },
                               "required": [
@@ -2545,6 +2575,25 @@
                       "t",
                       "npc"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "string",
+                        "const": "npc.remove"
+                      },
+                      "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      }
+                    },
+                    "required": [
+                      "t",
+                      "key"
+                    ],
+                    "additionalProperties": false
                   },
                   {
                     "type": "object",
@@ -3773,6 +3822,21 @@
                                 "warning",
                                 "error"
                               ]
+                            },
+                            "code": {
+                              "type": "string",
+                              "maxLength": 64
+                            },
+                            "params": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string",
+                                "maxLength": 40
+                              },
+                              "additionalProperties": {
+                                "type": "string",
+                                "maxLength": 100
+                              }
                             }
                           },
                           "required": [
@@ -4858,6 +4922,21 @@
                               "warning",
                               "error"
                             ]
+                          },
+                          "code": {
+                            "type": "string",
+                            "maxLength": 64
+                          },
+                          "params": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "maxLength": 40
+                            },
+                            "additionalProperties": {
+                              "type": "string",
+                              "maxLength": 100
+                            }
                           }
                         },
                         "required": [
@@ -5038,6 +5117,25 @@
                 "t",
                 "npc"
               ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "t": {
+                  "type": "string",
+                  "const": "npc.remove"
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "t",
+                "key"
+              ],
+              "additionalProperties": false
             },
             {
               "type": "object",
@@ -6266,6 +6364,21 @@
                           "warning",
                           "error"
                         ]
+                      },
+                      "code": {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      "params": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 100
+                        }
                       }
                     },
                     "required": [

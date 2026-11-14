@@ -35,7 +35,20 @@ export function diag(
 
 /** Strip the extra fields so the result satisfies the public `Diagnostic` schema. */
 export function toPublicDiagnostic(d: TeamDiagnostic): Diagnostic {
-  const out: Diagnostic = { file: d.file, message: d.message, severity: d.severity };
+  const out: Diagnostic = {
+    file: d.file,
+    message: d.message,
+    severity: d.severity,
+    code: d.code.slice(0, 64),
+  };
   if (d.path !== undefined) out.path = d.path;
+  if (d.params !== undefined) {
+    // Bounded plain strings only: the diagnostic must never carry file content.
+    out.params = Object.fromEntries(
+      Object.entries(d.params)
+        .slice(0, 8)
+        .map(([k, v]) => [k.slice(0, 40), String(v).slice(0, 100)]),
+    );
+  }
   return out;
 }
