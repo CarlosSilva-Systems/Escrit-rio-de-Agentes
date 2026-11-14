@@ -57,7 +57,7 @@ Um programa qualquer poderia começar a escutar na porta 3200 antes do Escritór
 
 ## Girar e revogar
 
-[Gire o token](../how-to/rotate-token.md) para invalidar tudo de uma vez. Veja também [Fazer logout](../how-to/log-out.md).
+Use **Configurações → Sair** neste navegador, ou [gire o token](../how-to/rotate-token.md) para invalidar tudo de uma vez. Veja também [Fazer logout](../how-to/log-out.md).
 
 ## Relacionado
 
