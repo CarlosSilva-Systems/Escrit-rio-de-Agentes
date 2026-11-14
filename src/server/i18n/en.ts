@@ -41,6 +41,8 @@ export const en: Record<keyof typeof ptBR, string> = {
   'cli.statusRunning': 'Running: http://127.0.0.1:{port} · PID {pid} · version {version}',
   'cli.stopped': 'Office stopped.',
   'cli.stopForced': 'The server did not answer the shutdown request; process was killed.',
+  'cli.stopNotOwner':
+    'Did not kill PID {pid}: it does not own the Office port (stale runtime.json?).',
   'cli.stopFailed': 'Could not stop the server.',
   'cli.tokenRotated':
     'Tokens regenerated. All browser sessions were invalidated; use "escritorio open" to sign in again.',

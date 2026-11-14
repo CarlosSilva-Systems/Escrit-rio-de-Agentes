@@ -1,5 +1,6 @@
 import { rm } from 'node:fs/promises';
 import { readMasterToken, readRuntimeInfo, rotateTokenFiles } from '../server/home';
+import { findPortOwner, type PortOwner } from '../server/http/net';
 import { t } from '../server/i18n';
 import { readTextOrNull } from '../server/team';
 import { openBrowser } from './browser';
@@ -74,6 +75,20 @@ export const status: CommandHandler = async (ctx) => {
   return 0;
 };
 
+/**
+ * Before any `kill` (B6): the process that LISTENS on the port must be the PID recorded in
+ * runtime.json, otherwise a stale file (PID reused by another program) could make `stop` kill
+ * a stranger.
+ */
+export async function ownsPort(
+  pid: number,
+  port: number,
+  findOwner: (port: number) => Promise<PortOwner | null> = findPortOwner,
+): Promise<boolean> {
+  const owner = await findOwner(port);
+  return owner !== null && owner.pid === pid;
+}
+
 /** `stop`: graceful shutdown through the API; falls back to killing the recorded PID. */
 export const stop: CommandHandler = async (ctx) => {
   const token = await readMasterToken(ctx.env.paths);
@@ -89,6 +104,9 @@ export const stop: CommandHandler = async (ctx) => {
     return 0;
   }
   if (runtime && isProcessAlive(runtime.pid)) {
+    if (!(await ownsPort(runtime.pid, ctx.env.port))) {
+      throw new CliError(t(ctx.lang, 'cli.stopNotOwner', { pid: runtime.pid }));
+    }
     process.kill(runtime.pid);
     if (await waitUntilDown(ctx, token, 5000)) {
       ctx.out(t(ctx.lang, 'cli.stopForced'));

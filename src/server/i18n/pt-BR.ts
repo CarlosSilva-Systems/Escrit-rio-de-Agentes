@@ -39,6 +39,8 @@ export const ptBR = {
   'cli.stopped': 'Escritório desligado.',
   'cli.stopForced':
     'O servidor não respondeu ao pedido de desligamento; processo encerrado à força.',
+  'cli.stopNotOwner':
+    'Não matei o PID {pid}: ele não é o dono da porta do Escritório (runtime.json desatualizado?).',
   'cli.stopFailed': 'Não foi possível desligar o servidor.',
   'cli.tokenRotated':
     'Tokens regenerados. Todas as sessões do navegador foram invalidadas; use "escritorio open" para entrar de novo.',
