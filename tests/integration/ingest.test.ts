@@ -19,6 +19,7 @@ import {
   type NpcLogical,
   type ServerMessage,
 } from '../../src/shared/contracts';
+import { proofOf } from '../../src/server/home/tokens';
 import { buildServer } from '../../scripts/build-server.mjs';
 import { officeServerOptions, type OfficeService } from '../../src/server/office';
 import {
@@ -52,6 +53,7 @@ afterAll(() => {
     rmSync(d, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 });
 
+const NL = String.fromCharCode(10);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function waitFor(predicate: () => boolean | Promise<boolean>, ms = 4000) {
   const end = Date.now() + ms;
@@ -69,7 +71,7 @@ interface Office {
   service: () => OfficeService | null;
 }
 
-async function startOffice(jsonl = false): Promise<Office> {
+async function startOffice(jsonl = false, jsonlOpts: Record<string, number> = {}): Promise<Office> {
   const claudeHome = tmp('claude-home-');
   mkdirSync(join(claudeHome, 'projects'), { recursive: true });
   mkdirSync(join(claudeHome, 'equipe'), { recursive: true });
@@ -78,7 +80,7 @@ async function startOffice(jsonl = false): Promise<Office> {
     claudeHome,
     mapPath: null,
     watchJsonl: jsonl,
-    jsonl: { metaGraceMs: 300, pollMs: 200, discoverMs: 1000 },
+    jsonl: { metaGraceMs: 300, pollMs: 200, discoverMs: 1000, ...jsonlOpts },
     flushMs: 10,
   });
   const server = await startTestServer({ extraRoutes: opts.extraRoutes, snapshot: opts.snapshot });
@@ -353,6 +355,12 @@ describe('hook script escritorio-hook.cjs (T-17)', () => {
     writeFileSync(join(home, 'hook-token'), TOKEN);
     let seen: { auth: string | undefined; body: Record<string, unknown> } | null = null;
     const srv = createServer((req, res) => {
+      if (req.url?.startsWith('/api/health/proof')) {
+        const n = new URL(req.url, 'http://x').searchParams.get('n') ?? '';
+        res.setHeader('content-type', 'application/json');
+        res.end(JSON.stringify({ proof: proofOf(TOKEN, n) }));
+        return;
+      }
       const chunks: Buffer[] = [];
       req.on('data', (c: Buffer) => chunks.push(c));
       req.on('end', () => {
@@ -383,6 +391,29 @@ describe('hook script escritorio-hook.cjs (T-17)', () => {
     expect(got.auth).toBe(`Bearer ${TOKEN}`);
     expect(got.body['tool_name']).toBe('Bash');
     expect(JSON.stringify(got.body)).not.toMatch(/CANARY|SYNTHETIC|tool_input/);
+  });
+
+  it('M2: a server that cannot prove it knows the hook token never receives the token or the payload', async () => {
+    const home = tmp('hook-squat-');
+    writeFileSync(join(home, 'hook-token'), TOKEN);
+    const requests: Array<{ url?: string; auth?: string }> = [];
+    const srv = createServer((req, res) => {
+      requests.push({ url: req.url, auth: req.headers.authorization });
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({ proof: 'a'.repeat(64) })); // wrong proof
+    });
+    await new Promise<void>((res) => srv.listen(0, '127.0.0.1', res));
+    const port = (srv.address() as { port: number }).port;
+    writeFileSync(
+      join(home, 'runtime.json'),
+      JSON.stringify({ pid: process.pid, port, startedAt: 1, version: '0' }),
+    );
+    const r = await run(home, payload);
+    await new Promise((res) => srv.close(res));
+    expect(r).toMatchObject({ code: 0, stdout: '' });
+    expect(requests).toHaveLength(1); // only the challenge
+    expect(requests[0]?.url).toContain('/api/health/proof');
+    expect(requests[0]?.auth).toBeUndefined();
   });
 
   it('CA-15: real hook script -> real server -> NPC working (stdout stays empty)', async () => {
@@ -540,5 +571,83 @@ describe('CLI settings:diff on a copy (T-18, integration)', () => {
     expect(res.stdout).toContain('+++ settings.json (proposto, nível 1)');
     expect(res.stdout).toContain('escritorio-hook.cjs');
     expect(readFileSync(file, 'utf8')).toBe(original);
+  });
+});
+
+describe('JsonlWatcher inactivity stop and hook x JSONL dedupe (Rita 4)', () => {
+  const SESSION = '22222222-2222-4222-8222-222222222222';
+
+  it('CA-18: a subagent that goes silent without a finished meta gets a synthetic subagent.stop', async () => {
+    const o = await startOffice(true, { inactivityStopMs: 700 });
+    try {
+      const seen: Array<{ kind: string; source: string; agent: { agentId: string | null } }> = [];
+      o.service()?.bus.on((e) => seen.push(e as never));
+      const dir = join(o.claudeHome, 'projects', 'slug', SESSION, 'subagents');
+      mkdirSync(dir, { recursive: true });
+      await sleep(150);
+      writeFileSync(join(dir, 'agent-quiet01.meta.json'), JSON.stringify({ agentType: 'dev-web' }));
+      writeFileSync(
+        join(dir, 'agent-quiet01.jsonl'),
+        JSON.stringify({
+          type: 'assistant',
+          sessionId: SESSION,
+          agentId: 'quiet01',
+          cwd: 'C:/x/y',
+          message: { id: 'q1', role: 'assistant', content: [], stop_reason: null },
+        }) + NL,
+      );
+      await waitFor(() => seen.some((e) => e.kind === 'subagent.start'), 2500);
+      await waitFor(() => seen.some((e) => e.kind === 'subagent.stop'), 4000);
+      expect(seen.find((e) => e.kind === 'subagent.stop')).toMatchObject({
+        source: 'jsonl',
+        agent: { agentId: 'quiet01' },
+      });
+      expect(o.service()?.jsonl?.stats().syntheticStops).toBe(1);
+    } finally {
+      await o.server.stop();
+    }
+  });
+
+  it('CA-15: the same tool use from a hook (with a timestamp) and from the JSONL is counted once', async () => {
+    const o = await startOffice(true);
+    try {
+      const seen: Array<{ kind: string; source: string; tool?: { useId?: string } }> = [];
+      o.service()?.bus.on((e) => seen.push(e as never));
+      const dir = join(o.claudeHome, 'projects', 'slug');
+      mkdirSync(dir, { recursive: true });
+      await sleep(150);
+      await postHook(o, {
+        hook_event_name: 'PreToolUse',
+        session_id: SESSION,
+        tool_name: 'Edit',
+        tool_use_id: 'toolu_cross1',
+        timestamp: '2026-11-14T10:00:00.000Z',
+      });
+      writeFileSync(
+        join(dir, SESSION + '.jsonl'),
+        JSON.stringify({
+          type: 'assistant',
+          sessionId: SESSION,
+          cwd: 'C:/x/y',
+          timestamp: '2026-11-14T10:00:00.500Z',
+          message: {
+            id: 'm9',
+            role: 'assistant',
+            content: [{ type: 'tool_use', id: 'toolu_cross1', name: 'Edit', input: {} }],
+            stop_reason: 'tool_use',
+          },
+        }) + NL,
+      );
+      await waitFor(async () => {
+        const d = (await getJson(o, '/api/diag')).json as { counters: Record<string, number> };
+        return (d.counters['ingest.duplicate'] ?? 0) >= 1;
+      }, 3000);
+      expect(
+        seen.filter((e) => e.kind === 'tool.pre' && e.tool?.useId === 'toolu_cross1'),
+      ).toHaveLength(1);
+      expect(seen.find((e) => e.tool?.useId === 'toolu_cross1')?.source).toBe('hook');
+    } finally {
+      await o.server.stop();
+    }
   });
 });
