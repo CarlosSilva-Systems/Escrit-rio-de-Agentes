@@ -34,7 +34,7 @@ O `Esc` fecha as coisas nesta ordem, uma por aperto: janela (Créditos, Atalhos)
 
 ## Barra superior
 
-Equipe (abre a gaveta com um botão Seguir por NPC), Som (liga/desliga), Idioma (pt-BR ⇄ en, sem recarregar), Configurações (Créditos, Atalhos de teclado).
+Equipe (abre a gaveta com um botão Seguir por NPC), Som (liga/desliga), Idioma (pt-BR ⇄ en, sem recarregar), Configurações (Créditos, Atalhos de teclado, Sair, que pede confirmação).
 
 ## Parâmetros de URL para desenvolvedores
 

@@ -60,6 +60,19 @@ Chaves de topo: `schema`, `tileSize` (16), `cols` (64), `rows` (52), `tilesets`,
 
 Definido e testado, mas sem uso até a Fase 3. `{schema: "uso/v1", updatedAt, source?, sessionId?, model?, windows: {fiveHour?, sevenDay?}, spendLimit?, extraWindows?}`, onde cada janela é `{usedPercentage, resetsAt (segundos epoch), observedAt?, stale?}`. Percentuais fora da faixa são aceitos pelo leitor e limitados pela interface.
 
+## Códigos de diagnóstico
+
+O servidor publica problemas como diagnósticos (`file`, `path` opcional, `severity`, `code`) e nunca deixa que eles quebrem o escritório. A interface transforma cada `code` numa frase traduzida (23 códigos). Um `escritorio.json` ausente é uma nota tranquila; um inválido é uma faixa de aviso com o nome do campo. Os detalhes nunca incluem conteúdo de arquivos.
+
+| Grupo | Códigos |
+|---|---|
+| `escritorio.json` | `team.json-invalid`, `team.file-too-large`, `team.field-invalid`, `team.schema-invalid`, `team.agent-duplicate`, `team.desk-duplicate`, `team.department-unknown`, `team.department-duplicate`, `team.lead-count` |
+| Contra o mapa e o `QUADRO.md` | `team.desk-missing-in-map`, `team.desk-wrong-room`, `team.room-missing-in-map`, `team.npc-without-agent`, `team.agent-without-npc`, `team.desk-null-not-provisional`, `team.more-issues` (os quatro últimos dividem uma frase genérica) |
+| `QUADRO.md` | `quadro.file-missing`, `quadro.no-agents`, `quadro.row-invalid`, `quadro.agent-duplicate`, `quadro.too-many` |
+| Mapa e escritório | `map.unreadable`, `office.freelancer-limit` |
+
+Qualquer outro código cai numa frase genérica "Aviso sobre <arquivo>" que aponta para o log do servidor.
+
 ## Relacionado
 
 - [Personalizar os NPCs](../how-to/customize-npcs.md)

@@ -23,7 +23,9 @@ Toda requisição precisa trazer o `Host` exato (`127.0.0.1:<porta>` ou `localho
 | `POST /api/auth/ticket` | bearer | Emite um ticket: `{ticket, expiresInSec: 60}`. |
 | `GET /api/health` | bearer ou session | `{ok: true, version}`. |
 | `GET /api/health/proof?n=<nonce>&k=master\|hook` | public | `{proof}`: HMAC-SHA256 do nonce com a chave do token, para o cliente verificar a identidade do servidor antes de enviar uma credencial. |
-| `POST /api/auth/logout` | session + CSRF | Esquece a sessão, expira o cookie, fecha os sockets dela (`204`). Nenhum botão a usa ainda. |
+| `POST /api/auth/logout` | session + CSRF | Esquece a sessão, expira o cookie, fecha os sockets dela (`204`). Usada por Configurações → Sair. |
+| `GET /api/config` | session | As configurações públicas (`lang`, `sound`, `music`, `quality`, `approvalDeadlineSec`, `chatMode`, `npcWorkPlace`). |
+| `PATCH /api/config` | session + CSRF | Altera configurações de uma lista fechada. O corpo é um `ConfigPatchSchema` estrito (campos desconhecidos ou corpo vazio: `400`). Gravado de forma atômica no `config.json`; devolve as configurações completas atualizadas. As mensagens do servidor e da CLI passam na hora para o idioma salvo. |
 | `GET /api/session` | session | `{csrfToken, lang}`. |
 | `POST /api/admin/shutdown` | bearer | Desligamento educado para o `escritorio stop` (`202`). |
 | `GET /api/state` | session | `OfficeSnapshot`: equipe, NPCs, aprovações, projetos, atividade (últimas 200), configuração pública, diagnósticos. |
@@ -32,7 +34,7 @@ Toda requisição precisa trazer o `Host` exato (`127.0.0.1:<porta>` ou `localho
 | `POST /api/hooks/v1/claude` | hook | Recebe o payload de um hook. `204`: aceito, duplicado ou evento ignorado. `202`: corpo inutilizável (contado como `ingest.invalid`). Nunca um 4xx por problema de conteúdo. Corpo de até 1 MB. |
 | arquivos estáticos | session | A aplicação web de `dist/web`. |
 
-Previstas para fases futuras e **ainda não implementadas**: `PATCH /api/config` (o navegador a chama quando você troca idioma ou som e ignora a falha; o idioma fica no `localStorage` do navegador), rotas de projetos, chat, aprovações, plano, uso e tokens.
+Previstas para fases futuras e **ainda não implementadas**: rotas de projetos, chat, aprovações, plano, uso e tokens.
 
 ### Limites
 
@@ -61,7 +63,7 @@ Cliente para servidor: só `{"t":"ping"}` (schema estrito; outros quadros são i
 | `1013` | Mais de 20 clientes simultâneos |
 | `4401` | Sessão encerrada ou invalidada (rotação de token) |
 
-Quadros do cliente são limitados a 1 KiB. Um cliente que não acompanha (mais de 4 MB acumulados) é desconectado e reconecta com um snapshot novo.
+Não existe mensagem WebSocket para configurações: uma mudança feita numa aba só chega às outras abas abertas quando elas recarregam. Quadros do cliente são limitados a 1 KiB. Um cliente que não acompanha (mais de 4 MB acumulados) é desconectado e reconecta com um snapshot novo.
 
 ## Relacionado
 

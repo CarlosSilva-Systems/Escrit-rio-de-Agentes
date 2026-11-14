@@ -10,7 +10,7 @@ Criada na primeira partida; mude com `ESCRITORIO_HOME`. Fica fora do OneDrive de
 |---|---|---|
 | `token` | Token mestre, 256 bits (43 caracteres base64url). Usado pela CLI para pedir tickets ao servidor e para desligá-lo. Nunca vai ao navegador. | sim |
 | `hook-token` | Token de hook, 256 bits. Usado só pelo script do hook para falar com `/api/hooks/v1/claude`. | sim |
-| `config.json` | Configurações públicas (lista fechada): `lang` (`pt-BR`/`en`), `sound`, `music`, `quality` (`auto`/`high`/`medium`/`low`), `approvalDeadlineSec` (10–300, padrão 60), `chatMode` (por projeto), `npcWorkPlace` (`desk`/`projectRoom`/`auto`). Um campo inválido volta ao padrão e um aviso é registrado; o arquivo não é reescrito. `lang` também define o idioma das mensagens da CLI e do servidor. | não |
+| `config.json` | Configurações públicas (lista fechada): `lang` (`pt-BR`/`en`), `sound`, `music`, `quality` (`auto`/`high`/`medium`/`low`), `approvalDeadlineSec` (10–300, padrão 60), `chatMode` (por projeto), `npcWorkPlace` (`desk`/`projectRoom`/`auto`). Gravado pelo `PATCH /api/config` (trocas de idioma e som na interface). Um campo inválido volta ao padrão e um aviso é registrado; o arquivo não é reescrito. `lang` também define o idioma das mensagens da CLI e do servidor. | não |
 | `runtime.json` | `{pid, port, startedAt, version}` do servidor em execução. Removido no desligamento normal. | não |
 | `sessions.json` | Sessões de navegador como hashes SHA-256 com horários de criação e último uso (nunca o cookie em si). Atrelado à geração do token. | não |
 | `bin\` | Scripts do hook copiados pelo `hooks:sync` (`escritorio-hook.cjs`). | não |

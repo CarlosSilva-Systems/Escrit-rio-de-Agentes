@@ -22,13 +22,13 @@ A Fase 1 é coberta pelos critérios de aceite CA-01 a CA-25. A matriz oficial, 
 | 10 | pt-BR padrão, inglês sem recarregar, mesmas chaves | Automatizado |
 | 11 | Todas as salas fixas presentes, cores de departamento | Automatizado |
 | 12 | Exatamente 16 NPCs com nomes e cargos corretos | Automatizado; a aprovação da lista de nomes (gate G1) é sua |
-| 13 | `escritorio.json` ausente ou inválido dá aviso e mantém o último válido | Automatizado; o aviso na tela já está no código e a marca de "falha esperada" do teste ainda precisa ser removida |
+| 13 | `escritorio.json` ausente ou inválido dá aviso e mantém o último válido | Automatizado, inclusive o aviso na tela |
 | 14 | Cartão de hover em até 150 ms | Automatizado |
-| 15 | Chamar um agente faz o NPC trabalhar em menos de 1 s | Automatizado (p95 de 143 ms) |
+| 15 | Chamar um agente faz o NPC trabalhar em menos de 1 s | Automatizado (p95 de 142 ms) |
 | 16 | Stop comemora; dois starts e um stop continua trabalhando | Automatizado |
 | 17 | Tipo desconhecido vira Freelancer, trocado ao entrar na equipe | Automatizado |
 | 18 | NPCs aparecem para sessões do Claude Desktop; aviso se não detectadas | Alternativa por arquivos automatizada; a sessão real do Desktop é a parte manual (gate G4) |
-| 19 | Clique abre o painel (10+ atividades); Esc ou clique fora fecha | Automatizado; o clique fora já está no código e a marca de "falha esperada" do teste ainda precisa ser removida |
+| 19 | Clique abre o painel (10+ atividades); Esc ou clique fora fecha | Automatizado |
 | 20 | Diff do settings antes, aprovação, backup, mescla aditiva, reversível | Automatizado em cópias temporárias; aplicar no arquivo real é a parte manual (gate G4) |
 | 21 | `rh-equipe` mantém o `escritorio.json`; cenas de boas-vindas e despedida | Cenas e `team:check` automatizados; a atualização da skill está pendente (fora do repositório) |
 | 22 | `prefers-reduced-motion` | Automatizado |
@@ -38,9 +38,11 @@ A Fase 1 é coberta pelos critérios de aceite CA-01 a CA-25. A matriz oficial, 
 
 Também exercitados na Fase 1: CA-30 (Origin, Host, CSRF, WebSocket), CA-39 (o hook nunca trava), CA-44 (projeto a partir da pasta de trabalho), CA-59 (statusLine no diff), CA-64 (privacidade), CA-71 (pedido de permissão leva o NPC à porta da Diretoria).
 
-## Como a matriz e o código se relacionam
+## Resultado final do QA da Fase 1
 
-O relatório de QA foi escrito enquanto correções entravam. Lendo o código atual, há correção para quatro achados que ele listava: o aviso de diagnósticos na tela (CA-13), fechar o painel do NPC clicando no chão (CA-19), fechar os sockets depois do `token:rotate` num escritório ocioso (CA-03) e o aviso "sessões do Desktop não detectadas" (CA-18). Os testes deles marcados como "falha esperada" ficam vermelhos até a marca ser removida. A suíte de ponta a ponta não foi rodada de novo ao escrever esta página; rode `npm run check` e `npm run test:e2e` para o resultado atual.
+Dos CA-01 a CA-25: **22 cobertos e passando** (no CA-08 só a parte automatizável), **3 parciais com resto manual** (CA-18, CA-20, CA-21) e **0 sem cobertura**. Última execução completa: `npm run check` verde com 474 testes unitários e 205 de integração, e 83 testes de ponta a ponta verdes, sem nenhum teste marcado como "falha esperada". Todos os bugs da rodada de QA estão corrigidos.
+
+Itens manuais ainda pendentes: uma sessão real do Claude Desktop, aplicar o diff do `settings.json`, a atualização da skill `rh-equipe`, uma execução de CPU de 10 minutos e o servidor rodando 8 horas. O desvio de CPU no pior caso (cerca de 17 % contra 10 %) é conhecido e está agendado para a Fase 4, veja [Desempenho](performance.md).
 
 ## Relacionado
 
