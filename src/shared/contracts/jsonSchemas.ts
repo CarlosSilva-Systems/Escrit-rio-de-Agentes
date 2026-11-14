@@ -58,6 +58,7 @@ export function buildJsonSchemas(): Record<string, JsonObject> {
     'rest.v1.schema.json': bundle('rest.v1', 'REST request/response bodies (v1)', {
       AuthTicketResponse: rest.AuthTicketResponseSchema,
       HealthResponse: rest.HealthResponseSchema,
+      HealthProofResponse: rest.HealthProofResponseSchema,
       SessionResponse: rest.SessionResponseSchema,
       ConfigPatch: rest.ConfigPatchSchema,
       ProjectCreateRequest: rest.ProjectCreateRequestSchema,

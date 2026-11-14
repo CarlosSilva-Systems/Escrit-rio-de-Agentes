@@ -99,7 +99,8 @@ describe('authentication (T-13)', () => {
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\//);
-    expect(cookie).toMatch(/Max-Age=604800/);
+    // 8 h sliding idle window (SESSION_TTL_MS); the 24 h absolute cap is enforced server-side (B3)
+    expect(cookie).toMatch(/Max-Age=28800(;|$)/);
     expect(cookie).not.toMatch(/Secure/i); // plain http on loopback
     expect(cookie).not.toContain(ticket);
     expect(cb.headers['cache-control']).toBe('no-store');

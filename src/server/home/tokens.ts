@@ -8,6 +8,11 @@ import type { HomePaths } from './paths';
 /** 256 bits as base64url = 43 characters. */
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
+/** HMAC-SHA256(secret, "escritorio-proof-v1:" + nonce), hex. Same formula in the hook script. */
+export function proofOf(secret: string, nonce: string): string {
+  return createHmac('sha256', secret).update(`escritorio-proof-v1:${nonce}`).digest('hex');
+}
+
 export function generateToken(): string {
   return randomBytes(32).toString('base64url');
 }
@@ -117,6 +122,15 @@ export class TokenStore extends EventEmitter {
   /** CSRF token of a session: HMAC(master, sid). Stateless, so it survives restarts. */
   csrfFor(sessionId: string): string {
     return createHmac('sha256', this.master).update(`csrf:${sessionId}`).digest('base64url');
+  }
+
+  /**
+   * Proof of identity for a client that is about to send a credential (M2): HMAC-SHA256 of a
+   * client-chosen nonce keyed by the token itself. Only a process that knows the token (i.e. our
+   * server) can compute it, so a squatter on the port never receives the real credential.
+   */
+  proofFor(kind: 'master' | 'hook', nonce: string): string {
+    return proofOf(kind === 'master' ? this.master : this.hook, nonce);
   }
 
   /** Values the log scrubber must remove if they ever reach a log line. */

@@ -1,5 +1,5 @@
 'use strict';
-// @escritorio-hook-version 1
+// @escritorio-hook-version 2
 //
 // Team Office hook (ADR-0004). Plain Node, NO dependencies, NO build: `hooks:sync` copies this
 // file to ~/.escritorio-equipe/bin/. Claude Code runs it for each hook event and pipes the
@@ -13,8 +13,11 @@
 //   responses, prompts and assistant text are dropped here, before the network.
 // - The hook token is read from ~/.escritorio-equipe/hook-token (never from argv/env/URL) and is
 //   only sent to 127.0.0.1 and only when runtime.json names a LIVE process (our server): a stray
-//   process squatting the port never receives it.
+//   process squatting the port never receives it. On top of that the server must PROVE it knows
+//   the token (HMAC of a fresh nonce keyed by the hook token) before anything is sent; the master
+//   token is never read here.
 
+const nodeCrypto = require('node:crypto');
 const fs = require('node:fs');
 const http = require('node:http');
 const os = require('node:os');
@@ -147,6 +150,52 @@ function slim(payload) {
   return out;
 }
 
+/** Identity challenge: only a server that knows the hook token can answer it. */
+function verifyServer(port, token) {
+  return new Promise((resolve) => {
+    const nonce = nodeCrypto.randomBytes(24).toString('base64url');
+    const req = http.request(
+      {
+        host: '127.0.0.1',
+        port,
+        path: '/api/health/proof?k=hook&n=' + nonce,
+        method: 'GET',
+        agent: false,
+      },
+      (res) => {
+        const chunks = [];
+        let size = 0;
+        res.on('data', (chunk) => {
+          size += chunk.length;
+          if (size <= 2048) chunks.push(chunk);
+        });
+        res.on('end', () => {
+          try {
+            if (res.statusCode !== 200 || size > 2048) return resolve(false);
+            const proof = JSON.parse(Buffer.concat(chunks).toString('utf8')).proof;
+            if (typeof proof !== 'string' || !/^[0-9a-f]{64}$/.test(proof)) return resolve(false);
+            const want = nodeCrypto
+              .createHmac('sha256', token)
+              .update('escritorio-proof-v1:' + nonce)
+              .digest();
+            resolve(nodeCrypto.timingSafeEqual(Buffer.from(proof, 'hex'), want));
+          } catch {
+            resolve(false);
+          }
+        });
+        res.on('error', () => resolve(false));
+      },
+    );
+    req.on('socket', (socket) => {
+      const connectTimer = setTimeout(() => req.destroy(), CONNECT_MS);
+      socket.once('connect', () => clearTimeout(connectTimer));
+      socket.once('error', () => clearTimeout(connectTimer));
+    });
+    req.on('error', () => resolve(false));
+    req.end();
+  });
+}
+
 function post(port, token, body) {
   return new Promise((resolve) => {
     const data = Buffer.from(JSON.stringify(body), 'utf8');
@@ -210,6 +259,7 @@ async function main() {
     session: body.session_id ? body.session_id.slice(0, 8) : null,
     status: null,
   };
+  if (!(await verifyServer(port, token))) return; // not our server: send nothing
   await post(port, token, body);
 }
 

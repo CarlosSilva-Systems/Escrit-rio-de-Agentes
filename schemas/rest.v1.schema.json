@@ -39,6 +39,18 @@
         "version"
       ]
     },
+    "HealthProofResponse": {
+      "type": "object",
+      "properties": {
+        "proof": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "proof"
+      ]
+    },
     "SessionResponse": {
       "type": "object",
       "properties": {

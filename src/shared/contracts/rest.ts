@@ -30,6 +30,9 @@ export const AuthCallbackQuerySchema = z.strictObject({ ticket: z.string().min(1
 /** `GET /api/health`. */
 export const HealthResponseSchema = z.object({ ok: z.literal(true), version: z.string().max(40) });
 
+/** `GET /api/health/proof?n=<nonce>&k=master|hook`: HMAC-SHA256 hex of the nonce keyed by the token. */
+export const HealthProofResponseSchema = z.object({ proof: z.string().regex(/^[0-9a-f]{64}$/) });
+
 /** `GET /api/session`. */
 export const SessionResponseSchema = z.object({
   csrfToken: z.string().min(16).max(128),

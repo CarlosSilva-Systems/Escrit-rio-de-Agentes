@@ -6,7 +6,10 @@ import type { TokenStore } from '../../home/tokens';
 import { restrictToCurrentUser } from '../../home/acl';
 
 export const SESSION_COOKIE = 'esc_sid';
-export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+/** Sliding idle window: refreshed by use, but never beyond SESSION_MAX_AGE_MS. */
+export const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+/** Absolute ceiling since login (B3): the session dies after 24 h no matter how busy it is. */
+export const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 const PERSIST_DEBOUNCE_MS = 1000;
 /** `lastSeen` is only refreshed (and persisted) when it is older than this. */
@@ -36,7 +39,7 @@ export interface SessionInfo {
 }
 
 /**
- * Browser sessions: random 256-bit ids, 7-day sliding expiry, in memory + persisted as SHA-256
+ * Browser sessions: random 256-bit ids, 8 h sliding idle expiry under a 24 h absolute cap, in memory + persisted as SHA-256
  * digests (the id itself is never stored). Bound to the master token generation: rotating the
  * token invalidates everything.
  */
@@ -56,7 +59,7 @@ export class SessionStore {
     const parsed = PersistedSchema.safeParse(await readJsonTolerant(this.paths.sessionsFile));
     if (!parsed.success || parsed.data.generation !== this.tokens.generation()) return;
     for (const s of parsed.data.sessions) {
-      if (s.lastSeen + SESSION_TTL_MS > this.now()) {
+      if (this.alive(s)) {
         this.sessions.set(s.h, { createdAt: s.createdAt, lastSeen: s.lastSeen });
       }
     }
@@ -84,7 +87,7 @@ export class SessionStore {
     const record = this.sessions.get(key);
     if (!record) return null;
     const t = this.now();
-    if (record.lastSeen + SESSION_TTL_MS <= t) {
+    if (!this.alive(record)) {
       this.sessions.delete(key);
       this.schedulePersist();
       return null;
@@ -97,6 +100,28 @@ export class SessionStore {
     const refreshCookie = t - lastRefresh > 60 * 60 * 1000;
     if (refreshCookie) this.lastCookieRefresh.set(key, t);
     return { id: cookie, csrf: this.tokens.csrfFor(cookie), refreshCookie };
+  }
+
+  /** Rate-limit key of a VALID session cookie, without sliding anything; `null` otherwise. */
+  peekKey(cookie: string | undefined): string | null {
+    if (!cookie || !SESSION_ID_PATTERN.test(cookie)) return null;
+    const record = this.sessions.get(sha256(cookie));
+    return record && this.alive(record) ? this.keyOf(cookie) : null;
+  }
+
+  /** Logout: forgets one session. Returns whether it existed. */
+  remove(cookie: string | undefined): boolean {
+    if (!cookie || !SESSION_ID_PATTERN.test(cookie)) return false;
+    const key = sha256(cookie);
+    this.lastCookieRefresh.delete(key);
+    const existed = this.sessions.delete(key);
+    if (existed) this.schedulePersist();
+    return existed;
+  }
+
+  private alive(record: SessionRecord): boolean {
+    const t = this.now();
+    return record.lastSeen + SESSION_TTL_MS > t && record.createdAt + SESSION_MAX_AGE_MS > t;
   }
 
   /** Stable per-session key for rate limiting (never the raw id). */
@@ -146,9 +171,8 @@ export class SessionStore {
   }
 
   private purge(): void {
-    const t = this.now();
     for (const [key, r] of this.sessions) {
-      if (r.lastSeen + SESSION_TTL_MS <= t) {
+      if (!this.alive(r)) {
         this.sessions.delete(key);
         this.lastCookieRefresh.delete(key);
       }

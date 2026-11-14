@@ -5,11 +5,11 @@ import {
   type HealthResponseSchema,
   type SessionResponseSchema,
 } from '../../../shared/contracts';
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { TokenStore } from '../../home/tokens';
 import { safeEqual } from '../../home/tokens';
 import type { Lang, MessageKey } from '../../i18n';
-import { sendError } from '../errors';
+import { ApiError, sendError } from '../errors';
 import type { NetContext } from '../net';
 import { render401Page } from './page401';
 import { SESSION_COOKIE, SESSION_TTL_MS, type SessionStore } from './sessions';
@@ -25,9 +25,17 @@ export interface RateLimits {
   health: number;
   /** State-changing requests per session (ARQUITETURA §5.5: 30/min). */
   actions: number;
+  /** `/api/health/proof`: called once per hook event, so it needs a generous own budget. */
+  proof: number;
 }
 
-export const DEFAULT_RATE_LIMITS: RateLimits = { general: 120, auth: 10, health: 600, actions: 30 };
+export const DEFAULT_RATE_LIMITS: RateLimits = {
+  general: 120,
+  auth: 10,
+  health: 600,
+  actions: 30,
+  proof: 6000,
+};
 
 export interface AuthDeps {
   tokens: TokenStore;
@@ -38,8 +46,15 @@ export interface AuthDeps {
   version: string;
   limits: RateLimits;
   onShutdownRequest: () => void;
+  /** Called with the rate-limit key of a session that logged out (closes its sockets). */
+  onSessionEnded?: (sessionKey: string) => void;
   now?: () => number;
 }
+
+const ProofQuerySchema = z.strictObject({
+  n: z.string().regex(/^[A-Za-z0-9_-]{16,128}$/),
+  k: z.enum(['master', 'hook']).default('master'),
+});
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const BEARER = /^Bearer ([A-Za-z0-9._~+/=-]{16,512})$/;
@@ -196,6 +211,32 @@ export function registerAuth(app: FastifyInstance, deps: AuthDeps): void {
       version: deps.version,
     }),
   );
+
+  /**
+   * Identity proof (M2): HMAC(token, nonce). Clients verify it BEFORE sending a credential, so a
+   * process squatting the port never receives a token. Public on purpose (it reveals nothing
+   * usable: the nonce is chosen by the caller and the key is 256 random bits).
+   */
+  app.get(
+    '/api/health/proof',
+    { config: { auth: 'public', rateLimit: { max: deps.limits.proof, timeWindow: '1 minute' } } },
+    async (request) => {
+      const query = ProofQuerySchema.safeParse(request.query);
+      if (!query.success) throw new ApiError(400, 'invalid_request', 'error.invalidRequest');
+      return { proof: deps.tokens.proofFor(query.data.k, query.data.n) };
+    },
+  );
+
+  /** Logout (B3): forgets the session, expires the cookie and closes its sockets. */
+  app.post('/api/auth/logout', async (request, reply) => {
+    const session = request.escSession;
+    if (session) {
+      deps.sessions.remove(session.id);
+      deps.onSessionEnded?.(session.key);
+    }
+    reply.clearCookie(SESSION_COOKIE, { path: '/' });
+    return reply.code(204).send();
+  });
 
   app.get('/api/session', async (request): Promise<z.infer<typeof SessionResponseSchema>> => ({
     csrfToken: request.escSession?.csrf ?? '',
