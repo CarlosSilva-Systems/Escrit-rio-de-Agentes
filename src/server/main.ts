@@ -30,6 +30,7 @@ async function main(): Promise<void> {
     if (stopping) return;
     stopping = true;
     process.stdout.write(`${t(lang, 'server.stopping')}\n`);
+    ctx?.app.log.info({ reason }, 'server stopping'); // logged BEFORE close()
     const force = setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS);
     force.unref();
     void (ctx?.app.close() ?? Promise.resolve()).finally(() => {
@@ -37,6 +38,22 @@ async function main(): Promise<void> {
       process.exit(0);
     });
   };
+
+  // Handlers first: a signal (or a stray error) during start-up must also shut down cleanly.
+  for (const signal of ['SIGINT', 'SIGTERM', 'SIGBREAK'] as const) {
+    process.on(signal, () => shutdown(signal));
+  }
+  // Message only: an error object may carry request fragments (privacy); never the stack.
+  const report = (kind: string, err: unknown) => {
+    const message = err instanceof Error ? err.message : String(err).slice(0, 200);
+    if (ctx) ctx.app.log.error({ errMessage: message }, kind);
+    else process.stderr.write(`${kind}: ${message}\n`);
+  };
+  process.on('unhandledRejection', (reason) => report('unhandled rejection', reason));
+  process.on('uncaughtException', (err) => {
+    report('uncaught exception', err);
+    shutdown('uncaughtException');
+  });
 
   try {
     ctx = await startServer({
@@ -63,9 +80,6 @@ async function main(): Promise<void> {
   }
 
   process.stdout.write(`${t(lang, 'server.started', { port: ctx.net.port })}\n`);
-  for (const signal of ['SIGINT', 'SIGTERM', 'SIGBREAK'] as const) {
-    process.on(signal, () => shutdown(signal));
-  }
 }
 
 main().catch((err: unknown) => {
