@@ -19,7 +19,7 @@
     "test:unit": "vitest run src",
     "test:int": "vitest run tests/integration --passWithNoTests",
     "test:e2e": "playwright test",
-    "check": "npm run lint && npm run typecheck && npm run test:unit && npm run test:int",
+    "check": "npm run lint && npm run typecheck && npm run credits:check && npm run test:unit && npm run test:int",
     "schemas:gen": "tsx scripts/gen-schemas.mjs",
     "settings:diff": "node dist/cli.js settings:diff",
     "team:check": "node dist/cli.js team:check",
@@ -27,7 +27,10 @@
     "settings:apply": "node dist/cli.js settings:apply",
     "settings:revert": "node dist/cli.js settings:revert",
     "hooks:sync": "node dist/cli.js hooks:sync",
-    "verify:baseline": "node scripts/verify-baseline.mjs"
+    "verify:baseline": "node scripts/verify-baseline.mjs",
+    "credits:check": "node scripts/check-credits.mjs",
+    "qa:contrast": "node scripts/check-contrast.mjs",
+    "perf:fase1": "node scripts/perf/measure-fase1.mjs --seconds 60"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.5",
